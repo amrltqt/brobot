@@ -1,0 +1,37 @@
+{
+    "id": 1,
+    "title": "Introduction to SELECT",
+    "description": "Learn how to SELECT data efficiently by retrieving only the subset of data you need, thereby controlling costs, boosting performance, and ensuring consistency.",
+    "chapters": [
+        {
+            "id": 1,
+            "order": 1,
+            "scenario_id": 1,
+            "title": "Selecting Columns Efficiently with Ordering",
+            "content": "<concept>\nIn SQL, it's important to retrieve only the data you really need. By doing this, you can keep your queries simple and easy to understand.\n\nWith the SELECT statement, you choose which columns you want to see, while the FROM clause tells SQL which table to look in. The LIMIT clause lets you see just a small part of the data, which is especially helpful when you're starting out or when you only want a quick glimpse of the information.\n\nAdditionally, the ORDER BY clause helps you arrange your data in a specific order—either from lowest to highest (ASC) or highest to lowest (DESC). This makes it easier to read the results, such as listing names in alphabetical order or ordering scores from best to worst.\n</concept>\n<examples>\nExample 1: Retrieve a single row ordered by student id in ascending order:\n```sql\nSELECT id FROM students ORDER BY id ASC LIMIT 1;\n```\n\nExample 2: Retrieve all students ordered by note in descending order:\n```sql\nSELECT name, note FROM students ORDER BY note DESC;\n```\n</examples>\n<exercice>\nWrite a SQL query that retrieves the name and note of two students.\nUse the LIMIT clause to restrict the number of results and the ORDER BY clause to sort the data by name in ascending order.\n</exercice>\n<success>\nThe student should provide a working query using SELECT to specify the columns, FROM to indicate the table, LIMIT to restrict the result set, and ORDER BY (with ASC or DESC) to sort the data as required. An explanation of why ordering is important should accompany the query.\n</success>\n<data>\nid | name    | note\n--------------------\n1  | Alice   | 7\n2  | John    | 6\n3  | Charlie | 8\n</data>",
+            "meta": {
+                "create_instructions": [
+                    "CREATE TABLE students (\n    id INTEGER,\n    name VARCHAR(50),\n    note INTEGER\n);"
+                ],
+                "insert_instructions": [
+                    "INSERT INTO students (id, name, note) VALUES \n    (1, 'Alice', 7),\n    (2, 'John', 6),\n    (3, 'Charlie', 8);"
+                ]
+            }
+        },
+        {
+            "id": 2,
+            "order": 2,
+            "scenario_id": 1,
+            "title": "Master Arithmetics and Derived Columns",
+            "content": "<concept>\nA derived column is a new column generated on the fly by applying arithmetic operations to existing columns. This allows you to transform data dynamically without modifying the underlying table.\n\n**Common Arithmetic Operations:**\n- **Addition (+):** Combines values from one or more columns (e.g., calculating total scores).\n- **Subtraction (-):** Computes the difference between values (e.g., measuring a gap between scores).\n- **Multiplication (*):** Scales values (e.g., converting a score on 10 to a score on 20).\n- **Division (/):** Computes ratios or averages (ensure you handle division by zero appropriately).\n- **Modulo (%):** Returns the remainder of a division (available in some SQL dialects).\n\nUsing an alias for a derived column gives it a meaningful name, making the output clearer for reporting and analysis.\n</concept>\n<examples>\nExample: Convert a score from a scale of 10 to 20, add bonus points, and compute a normalized score:\n```sql\nSELECT \n    name, \n    note AS note_on_10,\n    note * 2 AS note_on_20,\n    note + 1 AS note_with_bonus,\n    (note * 2) / 20.0 AS normalized_score\nFROM students;\n```\n</examples>\n<exercice>\nWrite a query that:\n1. Selects each student's name and their original note (on 10).\n2. Creates a new column “note_on_20” by multiplying the original note by 2.\n3. Creates another derived column “note_with_bonus” by adding 1 to the original note.\n4. Optionally, computes a “normalized_score” by dividing the note_on_20 by 20.\n\nMake sure to use aliases to clearly label each derived column.\n</exercice>\n<success>\nThe student provides a working query that applies arithmetic operations to compute the derived columns. They explain that derived columns allow on-the-fly data transformation and that aliases help clarify the purpose of each result in reporting.\n</success>\n<data>\nid | name    | note\n-------------------\n1  | Alice   | 7\n2  | John    | 6\n3  | Charlie | 8\n</data>",
+            "meta": {
+                "create_instructions": [
+                    "CREATE TABLE students (\n    id INTEGER,\n    name VARCHAR(50),\n    note INTEGER\n);"
+                ],
+                "insert_instructions": [
+                    "INSERT INTO students (id, name, note) VALUES \n    (1, 'Alice', 7),\n    (2, 'John', 6),\n    (3, 'Charlie', 8);"
+                ]
+            }
+        }
+    ]
+}
