@@ -50,3 +50,15 @@ async def api_create_training_session(
     service = SessionService(db)
     session = await service.get_or_create(USER_ID, scenario_id)
     return session
+
+
+@router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def api_delete_training_session(
+    session_id: int, db: Session = Depends(get_session)
+):
+    """
+    Delete a training session by its ID.
+    """
+    service = SessionService(db)
+    await service.delete(session_id)
+    return {"message": "Session deleted successfully"}

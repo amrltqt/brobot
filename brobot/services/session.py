@@ -151,3 +151,26 @@ class SessionService:
             content=message.content,
             role=message.role,
         )
+
+    async def delete(self, session_id: int) -> bool:
+        """
+        Delete a training session by its ID and all related information, ensuring cascade deletion.
+
+        Args:
+            session_id (int): The ID of the training session to delete.
+        Returns:
+            bool: True if the session was deleted, False otherwise.
+        """
+        statement = select(TrainingSession).where(TrainingSession.id == session_id)
+        session = self.session.exec(statement).first()
+
+        if not session:
+            return False
+
+        # Ensure cascade deletion of related messages
+        for message in session.messages:
+            self.session.delete(message)
+
+        self.session.delete(session)
+        self.session.commit()
+        return True
