@@ -11,6 +11,7 @@ interface ChatPageProps {
 export default function Page({ params }: ChatPageProps) {
     const { id } = React.use(params)
     const {
+        typing,
         messages,
         session,
         isLoading,
@@ -28,8 +29,7 @@ export default function Page({ params }: ChatPageProps) {
 
     return (
         <div className="flex flex-col h-full py-2">
-            <ChatForm messages={messages} sendMessage={handleSendMessage} />
-            <p>{connectionStatus}</p>
+            <ChatForm connectionStatus={connectionStatus} messages={messages} sendMessage={handleSendMessage} typing={typing} />
         </div>
     );
 }

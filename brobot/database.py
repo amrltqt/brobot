@@ -1,8 +1,7 @@
 from sqlmodel import create_engine, Session, SQLModel
 from brobot.core.config import settings
 
-# Create the SQLModel engine using the DATABASE_URL from settings.
-engine = create_engine(settings.DATABASE_URL, echo=True)
+engine = create_engine(settings.DATABASE_URL, echo=False)
 
 
 def get_session():

@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 
-import { fetchMySessions } from "@/api/sessions";
+import { fetchMySessions, deleteSession } from "@/api/sessions";
 import { TrainingSessionWithScenarioAndMessagesDTO } from "@/models/session";
 import Link from "next/link";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -11,7 +11,18 @@ import { Button } from "@/components/ui/button";
 
 export default function Page() {
 
-    const { data: sessions } = useSWR<TrainingSessionWithScenarioAndMessagesDTO[]>("1", () => fetchMySessions({ userId: "1" }));
+    const { data: sessions, mutate } = useSWR<TrainingSessionWithScenarioAndMessagesDTO[]>(
+        "1", () => fetchMySessions({})
+    );
+
+
+    const handleDeleteSession = async (sessionId: number) => {
+        try {
+            await deleteSession({ sessionId });
+        } catch (error) {
+            console.error("Failed to delete session:", error);
+        }
+    };
 
     return (
         <div className="flex flex-col min-h-screen py-2">
@@ -39,11 +50,16 @@ export default function Page() {
                             <div>Started: {session.scenario.created_at}</div>
                             <div>Number of messages: {session.messages.length}</div>
 
-                            <Button asChild>
+                            <div>
+                                <Button variant="destructive" size="sm" onClick={() => handleDeleteSession(session.id)}>
+                                    Delete
+                                </Button>
                                 <Link href={`/sessions/${session.id}`}>
-                                    View Session
+                                    <Button variant="outline" size="sm">
+                                        Continue
+                                    </Button>
                                 </Link>
-                            </Button>
+                            </div>
                         </CardFooter>
                     </Card>
                 ))}

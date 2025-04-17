@@ -1,96 +1,108 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from 'react';
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws/";
+// Type for WebSocket ready state
+export type ReadyState = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 
-export function useWebSocket(
-    url: string = WS_URL,
-    onMessageCallback?: (message: any) => void,
-    onReconnectCallback?: () => void,
-    onErrorCallback?: (error: any) => void
+// Options for the hook
+export interface UseResilientWebSocketOptions {
+    /** Callback when a message is received */
+    onMessage?: (data: string) => void;
+    /** Optional protocols string or array */
+    protocols?: string | string[];
+}
+
+/**
+ * React hook establishing a resilient WebSocket connection with:
+ * - Auto-reconnect with exponential back-off
+ * - Outgoing message queue when disconnected
+ * - Heartbeat ping to keep connection alive
+ * 
+ * @param url WebSocket URL
+ * @param options Configuration callbacks and protocols
+ * @returns { send, readyState }
+ */
+export function useWebsocket(
+    url: string,
+    { onMessage, protocols }: UseResilientWebSocketOptions = {}
 ) {
-    const [isConnected, setIsConnected] = useState<boolean>(false);
-    const wsRef = useRef<WebSocket | null>(null);
-    const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const reconnectAttemptsRef = useRef<number>(0);
+    const socketRef = useRef<WebSocket | null>(null);
+    const queueRef = useRef<string[]>([]);
+    const attemptsRef = useRef<number>(0);
+    const heartbeatRef = useRef<number | null>(null);
+    const [readyState, setReadyState] = useState<ReadyState>('CONNECTING');
 
+    // Cleanup socket and heartbeat
+    const cleanup = useCallback(() => {
+        if (heartbeatRef.current !== null) {
+            clearInterval(heartbeatRef.current);
+            heartbeatRef.current = null;
+        }
+        try {
+            socketRef.current?.close();
+        } catch {
+            /* ignored */
+        }
+        socketRef.current = null;
+    }, []);
+
+    // Establish connection and handlers
     const connect = useCallback(() => {
-        const ws = new WebSocket(url);
-        wsRef.current = ws;
+        const ws = new WebSocket(url, protocols);
+        socketRef.current = ws;
+        setReadyState('CONNECTING');
 
         ws.onopen = () => {
-            console.log("WebSocket connecté");
-            setIsConnected(true);
-            reconnectAttemptsRef.current = 0;
-            if (reconnectTimeoutRef.current) {
-                clearTimeout(reconnectTimeoutRef.current);
-                reconnectTimeoutRef.current = null;
-            }
-
-            if (onReconnectCallback) {
-                onReconnectCallback();
-            }
+            setReadyState('OPEN');
+            attemptsRef.current = 0;
+            // Heartbeat every 25s to keep proxies alive
+            heartbeatRef.current = window.setInterval(() => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(''); // empty ping or JSON.stringify({ type: 'ping' })
+                }
+            }, 25000);
+            // Flush queued messages
+            queueRef.current.forEach(msg => ws.send(msg));
+            queueRef.current = [];
         };
 
-        ws.onmessage = (event) => {
-            if (onMessageCallback) {
-                try {
-                    const data = JSON.parse(event.data);
-                    onMessageCallback(data);
-                } catch (error) {
-                    console.error("Erreur lors de la parsing du message WebSocket :", error);
-                }
-            } else {
-                console.log("Message reçu :", event.data);
-            }
+        ws.onmessage = event => {
+            onMessage?.(event.data);
         };
 
         ws.onclose = () => {
-            console.warn("Connexion WebSocket fermée, tentative de reconnexion...");
-            setIsConnected(false);
-            attemptReconnect();
+            setReadyState('CLOSED');
+            cleanup();
+            // Schedule reconnect with exponential back-off
+            const delay = Math.min(1000 * 2 ** attemptsRef.current, 30000);
+            attemptsRef.current += 1;
+            setTimeout(connect, delay);
         };
 
-        ws.onerror = (error) => {
-            console.error("Erreur WebSocket :", error);
-            if (onErrorCallback) {
-                onErrorCallback(error);
-            }
-
-            ws.close();
+        ws.onerror = () => {
+            // Let onclose handle reconnection
         };
-    }, [url, onMessageCallback, onReconnectCallback, onErrorCallback]);
+    }, [url, protocols, onMessage, cleanup]);
 
-    const attemptReconnect = useCallback(() => {
-        if (reconnectTimeoutRef.current) return;
-        reconnectAttemptsRef.current += 1;
-
-        const timeout = Math.min(1000 * reconnectAttemptsRef.current, 10000);
-        reconnectTimeoutRef.current = setTimeout(() => {
-            console.log(`Tentative de reconnexion, essai n°${reconnectAttemptsRef.current}`);
-            connect();
-        }, timeout);
-    }, [connect]);
-
+    // Initialize on mount and cleanup on unmount
     useEffect(() => {
         connect();
-
         return () => {
-            if (wsRef.current) {
-                wsRef.current.close();
-            }
-            if (reconnectTimeoutRef.current) {
-                clearTimeout(reconnectTimeoutRef.current);
-            }
+            cleanup();
         };
-    }, [connect]);
+    }, [connect, cleanup]);
 
-    const sendMessage = useCallback((message: string) => {
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-            wsRef.current.send(message);
+    /**
+     * Send a message or enqueue if not open
+     * @param message stringified payload
+     */
+    const send = useCallback((message: string) => {
+        const ws = socketRef.current;
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(message);
         } else {
-            console.error("Websocket is not opened. Message haven't been sent.");
+            queueRef.current.push(message);
         }
     }, []);
 
-    return { isConnected, sendMessage };
+    return { send, readyState };
 }

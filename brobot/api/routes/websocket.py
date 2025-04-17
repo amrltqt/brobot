@@ -2,175 +2,160 @@ import json
 import asyncio
 import logging
 
-from typing import Dict, List
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from fastapi import APIRouter, WebSocket, Depends
 from sqlmodel import Session
 
 from brobot.database import get_session
-
-from brobot.services.session import SessionService
-
 from brobot.bot.complete import generate_answer
 from brobot.bot.context import ScenarioContext
+from brobot.services.session import SessionService
+from brobot.ws.manager import ConnectionManager
+from brobot.dto import (
+    ScenarioChapterDTO,
+    TrainingSessionWithScenarioAndMessagesDTO,
+    SessionMessageDTO,
+)
 
 router = APIRouter()
 logger = logging.getLogger("uvicorn.error")
-
-
-class ConnectionManager:
-    """
-    This manager handles WebSocket connections by session (one client per session).
-    It allows:
-      - Accepting a new connection and sending queued messages.
-      - Sending a message to the connected client.
-      - Temporarily storing messages for a disconnected client.
-    """
-
-    def __init__(self):
-        # For each session_id, store the single connected websocket (if any)
-        self.active_connections: Dict[int, WebSocket] = {}
-        # Queue for each session to store messages that couldn't be delivered immediately
-        self.message_queues: Dict[int, List[str]] = {}
-
-    async def connect(self, session_id: int, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections[session_id] = websocket
-        logger.info(f"Client connected for session {session_id}.")
-        # If there are queued messages from previous disconnections, send them now
-        if session_id in self.message_queues and self.message_queues[session_id]:
-            logger.info(
-                f"Sending {len(self.message_queues[session_id])} queued message(s) for session {session_id}."
-            )
-            for message in self.message_queues[session_id]:
-                try:
-                    await websocket.send_text(message)
-                except Exception as e:
-                    logger.error(f"Error while sending a queued message: {str(e)}")
-            self.message_queues[session_id] = []
-
-    def disconnect(self, session_id: int):
-        if session_id in self.active_connections:
-            del self.active_connections[session_id]
-            logger.info(f"Client disconnected from session {session_id}.")
-
-    async def send_personal_message(self, session_id: int, message: str):
-        websocket = self.active_connections.get(session_id)
-        if websocket:
-            try:
-                await websocket.send_text(message)
-            except Exception as e:
-                logger.error(f"Error while sending personal message: {str(e)}")
-                self.queue_message(session_id, message)
-        else:
-            self.queue_message(session_id, message)
-
-    async def defer_message_generation(self, session_id: int, db: Session):
-        """
-        This method is called to defer message generation for a session.
-        It can be used to manage the flow of messages based on certain conditions.
-        """
-        # Placeholder for future implementation
-        logger.info(f"Message generation deferred for session {session_id}.")
-
-        session_service = SessionService(db)
-
-        training_session = await session_service.get_complete_scenario(session_id)
-        scenario = training_session.scenario
-        messages = [
-            {
-                "role": message.role,
-                "content": message.content,
-            }
-            for message in sorted(training_session.messages, key=lambda x: x.created_at)
-        ]
-        context = ScenarioContext(part_completed=False)
-
-        answer = await generate_answer(
-            scenario=scenario,
-            current_chapter=scenario.chapters[0],
-            messages=messages,
-            context=context,
-        )
-
-        message = await session_service.add_message(
-            session_id=session_id,
-            role="assistant",
-            content=answer,
-        )
-        await self.send_message(
-            session_id=session_id,
-            message=message.model_dump_json(),
-        )
-
-    def queue_message(self, session_id: int, message: str):
-        if session_id not in self.message_queues:
-            self.message_queues[session_id] = []
-        self.message_queues[session_id].append(message)
-        logger.info(f"No active connection for session {session_id}. Message queued.")
-
-    async def send_message(self, session_id: int, message: str):
-        await self.send_personal_message(session_id, message)
 
 
 # Global instance of ConnectionManager to handle sessions
 connection_manager = ConnectionManager()
 
 
+class BotAdapter:
+    def __init__(
+        self,
+        session_id: int,
+        session_service: SessionService,
+        connection_manager: ConnectionManager,
+    ):
+        self.session_id = session_id
+        self.connection_manager = connection_manager
+        self.session_service = session_service
+
+    async def _get_session(self):
+        """
+        Retrieve the session from the session service.
+        """
+        session = await self.session_service.get_complete_scenario(self.session_id)
+        if not session:
+            logger.error(f"Session {self.session_id} not found.")
+            raise Exception("Session not found")
+        return session
+
+    async def _identify_current_chapter(
+        self, session: TrainingSessionWithScenarioAndMessagesDTO
+    ) -> ScenarioChapterDTO:
+        """
+        Identify the current chapter based on the session's messages.
+        """
+        if not session.scenario:
+            logger.error("Session has no scenario.")
+            raise Exception("Scenario not found")
+
+        if not session.scenario.chapters:
+            logger.error("Scenario has no chapters.")
+            raise Exception("No chapters found")
+
+        # Let's stub to the first chapter
+        if not len(session.scenario.chapters) > 0:
+            logger.error("No chapters found in scenario.")
+            raise Exception("No chapters found in scenario")
+
+        current_chapter = session.scenario.chapters[0]
+        return current_chapter
+
+    def _convert_message(self, messages: list[SessionMessageDTO]):
+        """
+        Convert messages to the format required by the bot.
+        """
+        return [
+            {
+                "role": message.role,
+                "content": message.content,
+            }
+            for message in messages
+        ]
+
+    async def answer_user_message(self):
+        """
+        Generate an answer to the user's message.
+        """
+
+        session = await self._get_session()
+        current_chapter = await self._identify_current_chapter(session)
+        messages = self._convert_message(session.messages)
+        context = ScenarioContext(part_completed=False)
+
+        bot_answer = await generate_answer(
+            scenario=session.scenario,
+            current_chapter=current_chapter,
+            messages=messages,
+            context=context,
+        )
+
+        if bot_answer:
+            bot_message = await self.session_service.add_message(
+                self.session_id,
+                bot_answer,
+                "assistant",
+            )
+            await self.connection_manager.send_json(
+                self.session_id, {"type": "typing", "status": "stop"}
+            )
+
+            await self.connection_manager.send_text(
+                self.session_id, bot_message.model_dump_json()
+            )
+
+
 @router.websocket("/{session_id}")
 async def session_ws(
     websocket: WebSocket, session_id: int, db: Session = Depends(get_session)
 ):
-    """
-    WebSocket endpoint to handle messages for a session.
-    - On connection, a welcome message is sent.
-    - Received messages are parsed and, if le rôle est "user" ou "assistant", sont sauvegardés en base de données.
-    - Other messages (par exemple, de type "log") ne sont enregistrés qu'à titre informatif.
-    - On disconnection, the event is logged.
-    """
+    await connection_manager.connect(session_id, websocket)
 
     service = SessionService(db)
 
-    # Ensure session_id is an integer
-    session_id = int(session_id)
+    async def send_history(cm: ConnectionManager, sid: int, ws: WebSocket):
+        session = await service.get(sid)
+        logger.info("Sending history to client", extra={"session_id": sid})
+        for msg in session.messages:
+            await cm.send_text(sid, msg.model_dump_json())
 
-    # Accept the connection
-    await connection_manager.connect(session_id, websocket)
+    async def handle_incoming(cm: ConnectionManager, sid: int, raw: str):
+        if not raw:
+            logger.warning(f"[{sid}] Received empty message")
+            return
 
-    # Send an acknowledgment to the client.
-    await connection_manager.send_message(
-        session_id,
-        json.dumps({"role": "log", "content": "WebSocket connection established"}),
-    )
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            logger.error(f"[{sid}] Invalid JSON: {raw}")
+            return
 
-    session = await service.get(session_id)
+        await cm.send_json(sid, {"type": "typing", "status": "start"})
 
-    for message in session.messages:
-        await connection_manager.send_message(
-            session_id=session_id, message=message.model_dump_json()
+        user_message = await service.add_message(
+            sid,
+            data.get("content"),
+            data.get("role"),
         )
 
-    try:
-        while True:
-            content = await websocket.receive_text()
-            logger.info(f"Message received in session {session_id}: {content}")
+        await cm.send_text(sid, user_message.model_dump_json())
 
-            message = await service.add_message(session_id, content)
-            logger.info(f"Message saved in DB for session {session_id}.")
+        adapter = BotAdapter(
+            session_id=sid,
+            session_service=service,
+            connection_manager=cm,
+        )
+        asyncio.create_task(adapter.answer_user_message())
 
-            await connection_manager.send_message(
-                session_id=session_id, message=message.model_dump_json()
-            )
-
-            asyncio.create_task(
-                connection_manager.defer_message_generation(
-                    session_id,
-                    db,
-                )
-            )
-
-    except WebSocketDisconnect:
-        connection_manager.disconnect(session_id)
-        logger.info(f"Client disconnected from session {session_id}.")
-    except Exception as e:
-        logger.error(f"Error handling session {session_id}: {str(e)}")
-        connection_manager.disconnect(session_id)
+    await connection_manager.handle_session(
+        session_id,
+        websocket,
+        on_connect=send_history,
+        on_receive=handle_incoming,
+    )

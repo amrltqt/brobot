@@ -1,75 +1,107 @@
 import { useState, useCallback, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import { fetchSession } from "@/api/sessions";
-import { useWebSocket } from "./use-websocket";
-import type { SessionMessageDTO, TrainingSessionWithScenarioAndMessagesDTO } from "@/models/session";
+import { useWebsocket } from "./use-websocket";
+import type {
+    SessionMessageDTO,
+    TrainingSessionWithScenarioAndMessagesDTO,
+} from "@/models/session";
+import { upsertAndSortMessages } from "@/utils/messages";
 
-export function useChatService(userId: string, sessionId: number) {
-
+export function useChatService(
+    userId: string,
+    sessionId: number
+) {
+    // Local state for chat messages
     const [messages, setMessages] = useState<SessionMessageDTO[]>([]);
+    const [typing, setTyping] = useState(false);
 
+    // Fetch session metadata & history
     const { data: session, error: restError } = useSWR<TrainingSessionWithScenarioAndMessagesDTO>(
         sessionId.toString(),
-        () => fetchSession({ sessionId, userId })
+        () => fetchSession({ sessionId })
     );
 
-    const [wsStatus, setWsStatus] = useState<"connecting" | "connected" | "reconnecting" | "error">("connecting");
-    const [wsError, setWsError] = useState<any>(null);
-    const [wsLog, setWsLog] = useState<string | null>();
+    // Connection status: connecting | connected | reconnecting
+    const [connectionStatus, setConnectionStatus] = useState<
+        "connecting" | "connected" | "reconnecting"
+    >("connecting");
 
-    const handleWsMessage = useCallback((msg: SessionMessageDTO) => {
-        if (msg.id) {
-            setMessages((prevMessages) => [...prevMessages, msg]);
-        }
-    }, []);
+    // Handler when a message arrives via WebSocket
+    const handleWsMessage = useCallback((data: string) => {
+        if (!data?.trim()) return;
+        try {
+            const parsed = JSON.parse(data);
 
-    const handleWsReconnect = useCallback(() => {
-        console.log("WebSocket reconnecté, rafraîchissement de la session");
-        setMessages([]);
-        setWsError(null);
-        setWsStatus("connected");
-        mutate(sessionId.toString(), fetchSession({
-            sessionId,
-            userId,
-        }), false);
-    }, [sessionId]);
-
-    const handleWsError = useCallback((error: any) => {
-        console.error("Erreur signalée par WS:", error);
-        setWsError(error);
-        setWsStatus("error");
-    }, []);
-
-    const { isConnected, sendMessage } = useWebSocket(
-        `http://localhost:8000/ws/${sessionId}`,
-        handleWsMessage,
-        handleWsReconnect,
-        handleWsError
-    );
-
-    useEffect(() => {
-        if (isConnected) {
-            setWsStatus("connected");
-        } else {
-            if (wsStatus !== "error") {
-                setWsStatus("reconnecting");
+            if (parsed.type === "typing") {
+                setTyping(parsed.status === "start");
+                return;
             }
+
+            const msg: SessionMessageDTO = parsed;
+            if (!msg.id) return;
+
+            setMessages((prev) => upsertAndSortMessages(prev, msg));
+        } catch (err) {
+            console.error("Invalid WS message format:", err, data);
         }
-    }, [isConnected, wsStatus]);
+    }, []);
 
-    const sendChatMessage = useCallback((message: string) => {
-        sendMessage(message);
-    }, [sendMessage]);
+    // Called on initial open and every reconnect
+    const handleWsOpen = useCallback(() => {
+        console.info("WebSocket open/reconnected, refreshing session");
+        setMessages([]);
+        setConnectionStatus("connected");
+        // Revalidate REST cache without re-fetching data for React
+        mutate(
+            sessionId.toString(),
+            fetchSession({ sessionId }),
+            false
+        );
+    }, [sessionId, userId]);
 
-    const error = wsError || restError || null;
+    // Initialize resilient WebSocket
+    const { send, readyState } = useWebsocket(
+        `ws://localhost:8000/ws/${sessionId}`,
+        { onMessage: handleWsMessage }
+    );
+
+    // Map readyState to our connectionStatus and handle opens
+    useEffect(() => {
+        switch (readyState) {
+            case "OPEN":
+                handleWsOpen();
+                break;
+            case "CONNECTING":
+                setConnectionStatus("connecting");
+                break;
+            case "CLOSING":
+            case "CLOSED":
+                setConnectionStatus("reconnecting");
+                break;
+        }
+    }, [readyState, handleWsOpen]);
+
+    // Public send function
+    const sendMessage = useCallback(
+        (content: string) => {
+            const payload = { role: "user", content };
+            send(JSON.stringify(payload));
+        },
+        [send]
+    );
+
+    // Aggregate error/loading state
+    const error = restError;
     const isLoading = !session && !error;
 
     return {
+        typing,
         messages,
         session,
         isLoading,
-        connectionStatus: wsStatus,
+        connectionStatus,
         error,
-        sendMessage: sendChatMessage,
+        sendMessage,
     };
 }
