@@ -26,6 +26,7 @@ class TrainingSession(SQLModel, table=True):
 
     scenario: "Scenario" = Relationship(back_populates="sessions")
     messages: List["SessionMessage"] = Relationship(back_populates="session")
+    completions: List["ChapterCompletion"] = Relationship(back_populates="session")
 
 
 class SessionMessage(SQLModel, table=True):
@@ -61,6 +62,7 @@ class ScenarioChapter(SQLModel, table=True):
     meta: Optional[dict] = Field(default={}, sa_column=Column(JSON))
 
     scenario: Optional["Scenario"] = Relationship(back_populates="chapters")
+    completions: List["ChapterCompletion"] = Relationship(back_populates="chapter")
 
 
 class Scenario(SQLModel, table=True):
@@ -80,3 +82,20 @@ class Scenario(SQLModel, table=True):
 
     chapters: List["ScenarioChapter"] = Relationship(back_populates="scenario")
     sessions: List["TrainingSession"] = Relationship(back_populates="scenario")
+
+
+class ChapterCompletion(SQLModel, table=True):
+    __tablename__ = "chapter_completion"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    session_id: int = Field(foreign_key="training_session.id", index=True)
+    chapter_id: int = Field(foreign_key="scenario_chapter.id", index=True)
+    message_id: int = Field(foreign_key="session_message.id")
+
+    completed_at: datetime.datetime = Field(
+        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
+    )
+
+    session: "TrainingSession" = Relationship(back_populates="completions")
+    chapter: "ScenarioChapter" = Relationship(back_populates="completions")

@@ -36,3 +36,16 @@ CREATE TABLE session_message (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES conversation_session (id)
 );
+
+-- Table: chapter_completion
+CREATE TABLE chapter_completion (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER NOT NULL,
+    chapter_id INTEGER NOT NULL,
+    message_id INTEGER NOT NULL,
+    completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES training_session (id),
+    FOREIGN KEY (chapter_id) REFERENCES scenario_chapter (id),
+    FOREIGN KEY (message_id) REFERENCES session_message (id),
+    UNIQUE (session_id, chapter_id)
+);
