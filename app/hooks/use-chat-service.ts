@@ -62,7 +62,7 @@ export function useChatService(
 
     // Initialize resilient WebSocket
     const { send, readyState } = useWebsocket(
-        `ws://localhost:8000/ws/${sessionId}`,
+        `ws://localhost:8000/sessions/ws/${sessionId}`,
         { onMessage: handleWsMessage }
     );
 
