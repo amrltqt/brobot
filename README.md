@@ -28,13 +28,7 @@ Once you have `uv` installed, clone the repository and install the required depe
 
 ```shell
 cd brobot
-uv venv && uv sync
-
-# Add the brobot directory to your PYTHONPATH
-export PYTHONPATH=$(pwd)
-
-# Install it at as development package
-uv pip install -e .
+uv sync --all-extras --dev
 ```
 
 This will create a virtual environment and install the required dependencies in it for the web server and the bot.
