@@ -1,15 +1,15 @@
 # .github/workflows/ci.yml
-name: CI
+name: Integration Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   test:
-    name: Tests (unit + integ)
+    name: Integration Tests
     runs-on: ubuntu-latest
 
     steps:
