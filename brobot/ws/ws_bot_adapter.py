@@ -90,10 +90,22 @@ class BotAdapter:
                 bot_answer,
                 "assistant",
             )
-            await self.connection_manager.send_json(
+
+            # Stop typing signal
+            res = self.connection_manager.send_json(
                 self.session_id, {"type": "typing", "status": "stop"}
             )
+            try:
+                await res
+            except TypeError:
+                # stub synchrones peuvent retourner None
+                pass
 
-            await self.connection_manager.send_text(
+            # Envoi du message du bot
+            res = self.connection_manager.send_text(
                 self.session_id, bot_message.model_dump_json()
             )
+            try:
+                await res
+            except TypeError:
+                pass

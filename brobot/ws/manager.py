@@ -127,12 +127,14 @@ class ConnectionManager:
             # Receive loop
             while True:
                 raw = await websocket.receive_text()
+
+                clean = raw.strip()
                 # ignore empty heartbeats
-                if not raw.strip():
+                if not clean:
                     continue
                 # Dispatch to hook in background
                 if on_receive:
-                    asyncio.create_task(on_receive(self, session_id, raw))
+                    await on_receive(self, session_id, clean)
         except WebSocketDisconnect:
             self.disconnect(session_id)
         except Exception as e:
