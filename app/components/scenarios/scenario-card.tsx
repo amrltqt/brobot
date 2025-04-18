@@ -1,76 +1,58 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { BookOpen } from 'lucide-react'
-import React from "react"
-import { Button } from "../ui/button"
-import { ScenarioRead } from "@/models/scenario"
-import { redirect } from "next/navigation"
+"use client";
 
-
+import React from "react";
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    CardFooter,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Play, Trash2, BookOpen } from "lucide-react";
+import { ScenarioRead } from "@/models/scenario";
 
 interface ScenarioCardProps {
-    scenario: ScenarioRead
+    scenario: ScenarioRead;
+    onStart: () => void;
+    onDelete: () => void;
 }
 
-const deleteScenario = async (id: number) => {
-    try {
-        const response = await fetch(`http://localhost:8000/scenarios/${id}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) {
-            throw new Error('Failed to delete scenario');
-        }
-        window.location.reload(); // Refresh the page after deletion
-    } catch (error) {
-        console.error(error);
-        alert('Error while deleting the scenario');
-    }
-};
-
-const createScenario = async (id: number) => {
-    try {
-        const response = await fetch(`http://localhost:8000/sessions/${id}`, {
-            method: 'POST',
-        });
-        if (!response.ok) {
-            throw new Error('Failed to create scenario');
-        }
-        redirect(`/sessions/${id}`);
-    } catch (error) {
-        console.error(error);
-        alert('Error while creating the scenario');
-    }
-}
-
-export function ScenarioCard({ scenario }: ScenarioCardProps) {
-
-    // Truncate the description to 500 characters
-    const truncatedDescription =
-        scenario.description.length > 500
-            ? `${scenario.description.substring(0, 500)}...`
-            : scenario.description
+export function ScenarioCard({
+    scenario,
+    onStart,
+    onDelete,
+}: ScenarioCardProps) {
+    const { title, description, chapters } = scenario;
+    const chaptersCount = chapters?.length ?? 0;
 
     return (
-        <Card className="overflow-hidden">
-            <CardHeader className="p-4 pb-2">
-                <CardTitle className="text-lg">{scenario.title}</CardTitle>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <BookOpen className="h-3 w-3" />
-                    <span>12 chapters</span>
-                </div>
+        <Card className="w-full">
+            <CardHeader className="flex items-center justify-between pb-2">
+                <CardTitle className="text-lg">{title}</CardTitle>
+                <Badge variant="secondary" className="flex items-center space-x-1">
+                    <BookOpen className="h-4 w-4" />
+                    <span>{chaptersCount}</span>
+                </Badge>
             </CardHeader>
-            <CardContent className="p-4 pt-0">
-                <CardDescription className="text-xs line-clamp-4">
-                    {truncatedDescription}
-                </CardDescription>
+
+            <CardContent className="p-2">
+                <p className="text-sm text-muted-foreground">
+                    {description}
+                </p>
             </CardContent>
-            <CardFooter className="p-4 pt-0">
-                <Button onClick={() => createScenario(scenario.id)}>
-                    Start
+
+            <CardFooter className="flex justify-end space-x-2 p-2">
+                <Button size="sm" onClick={onStart}>
+                    <Play className="mr-1 h-4 w-4" />
+                    Démarrer
                 </Button>
-                <Button variant="destructive" className="ml-2" size="sm" onClick={() => deleteScenario(scenario.id)}>
+                <Button size="sm" variant="destructive" onClick={onDelete}>
+                    <Trash2 className="mr-1 h-4 w-4" />
                     Supprimer
                 </Button>
             </CardFooter>
         </Card>
-    )
+    );
 }

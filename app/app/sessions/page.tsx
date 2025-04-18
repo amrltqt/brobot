@@ -26,7 +26,7 @@ export default function Page() {
 
     return (
         <div className="flex flex-col min-h-screen py-2">
-            <h1 className="text-4xl font-bold">Chat</h1>
+            <h1 className="text-2xl font-bold">Sessions</h1>
             <p className="text-lg">Engaged scenarios</p>
             <div className="flex flex-col gap-4">
                 {sessions?.map((session) => (
