@@ -1,3 +1,4 @@
+import asyncio
 from sqlmodel import Session, select
 
 from brobot.models import TrainingSession, SessionMessage
@@ -9,6 +10,9 @@ from brobot.dto import (
     ScenarioChapterWithoutContentDTO,
     TrainingSessionWithScenarioAndMessagesDTO,
 )
+
+from brobot.bot.context import ScenarioContext
+from brobot.bot.complete import generate_answer
 
 
 class SessionService:
@@ -59,7 +63,7 @@ class SessionService:
             ],
         )
 
-    async def get_complete_scenario(self, session_id: int) -> TrainingSession:
+    async def get_complete_session(self, session_id: int) -> TrainingSession:
         """
         Retrieve a training session by its ID with complete scenario details.
         Args:
@@ -117,12 +121,24 @@ class SessionService:
             TrainingSessionWithScenarioAndMessagesDTO: The training session.
         """
 
-        session = TrainingSession(user_id=user_id, scenario_id=scenario_id)
-        self.session.add(session)
-        self.session.commit()
-        self.session.refresh(session)
+        statement = select(TrainingSession).where(
+            TrainingSession.user_id == user_id,
+            TrainingSession.scenario_id == scenario_id,
+        )
+        existing = self.session.exec(statement).first()
+        if existing:
+            return self.__session_to_training_session_dto(existing)
 
-        return self.__session_to_training_session_dto(session)
+        new_session = TrainingSession(user_id=user_id, scenario_id=scenario_id)
+        self.session.add(new_session)
+        self.session.commit()
+        self.session.refresh(new_session)
+
+        dto = self.__session_to_training_session_dto(new_session)
+
+        asyncio.create_task(self.generate_answer(new_session.id))
+
+        return dto
 
     async def add_message(
         self, session_id: int, content: str, role: str = "user"
@@ -174,3 +190,46 @@ class SessionService:
         self.session.delete(session)
         self.session.commit()
         return True
+
+    async def generate_answer(self, session_id: int) -> SessionMessageDTO:
+        """
+        Generate an answer to the user's message.
+        """
+
+        session = await self.get_complete_session(session_id)
+        if not len(session.scenario.chapters) > 0:
+            raise Exception("No chapters found in scenario")
+        current_chapter = session.scenario.chapters[0]
+
+        if not len(session.messages) == 0:
+            messages = [
+                {
+                    "role": "assistant",
+                    "content": "Start",
+                }
+            ]
+        else:
+            messages = [
+                {
+                    "role": message.role,
+                    "content": message.content,
+                }
+                for message in session.messages
+            ]
+
+        context = ScenarioContext(part_completed=False)
+
+        bot_answer = await generate_answer(
+            scenario=session.scenario,
+            current_chapter=current_chapter,
+            messages=messages,
+            context=context,
+        )
+
+        bot_message = await self.add_message(
+            session_id,
+            bot_answer,
+            "assistant",
+        )
+
+        return bot_message

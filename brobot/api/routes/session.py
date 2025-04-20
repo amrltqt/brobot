@@ -47,7 +47,6 @@ async def api_my_training_sessions(db: Session = Depends(get_session)):
     """
     service = SessionService(db)
     sessions = await service.users_sessions(USER_ID)
-    print(sessions)
 
     return sessions
 
@@ -72,8 +71,9 @@ async def api_delete_training_session(
     Delete a training session by its ID.
     """
     service = SessionService(db)
-    await service.delete(session_id)
-    return {"message": "Session deleted successfully"}
+    success = await service.delete(session_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Session not found")
 
 
 @router.websocket("/ws/{session_id}")

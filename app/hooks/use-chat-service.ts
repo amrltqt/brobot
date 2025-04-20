@@ -22,6 +22,13 @@ export function useChatService(
         () => fetchSession({ sessionId })
     );
 
+    // Initialize local messages state from fetched session history
+    useEffect(() => {
+        if (session?.messages) {
+            setMessages(session.messages);
+        }
+    }, [session]);
+
     // Connection status: connecting | connected | reconnecting
     const [connectionStatus, setConnectionStatus] = useState<
         "connecting" | "connected" | "reconnecting"
@@ -40,7 +47,6 @@ export function useChatService(
 
             const msg: SessionMessageDTO = parsed;
             if (!msg.id) return;
-
             setMessages((prev) => upsertAndSortMessages(prev, msg));
         } catch (err) {
             console.error("Invalid WS message format:", err, data);
@@ -93,7 +99,12 @@ export function useChatService(
 
     // Aggregate error/loading state
     const error = restError;
-    const isLoading = !session && !error;
+    const isLoading = !session && !error && readyState !== "OPEN";
+
+    // Debug: log messages state whenever it updates
+    useEffect(() => {
+        console.log("Messages state updated:", messages);
+    }, [messages]);
 
     return {
         typing,

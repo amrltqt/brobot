@@ -44,10 +44,9 @@ class DummySessionService:
 
 @pytest.mark.asyncio
 async def test_answer_user_message_success(monkeypatch):
-    # Prépare un "session" minimaliste
     dummy_chapter = SimpleNamespace(id=1)
     dummy_scenario = SimpleNamespace(chapters=[dummy_chapter])
-    # 1 message utilisateur
+
     dummy_msg = SimpleNamespace(role="user", content="bonjour")
     session_obj = SimpleNamespace(scenario=dummy_scenario, messages=[dummy_msg])
 
@@ -65,10 +64,8 @@ async def test_answer_user_message_success(monkeypatch):
     # add_message doit avoir été appelé avec le résultat de generate_answer
     assert service.added == [(123, "réponse_bot", "assistant")]
 
-    # on a d'abord envoyé le signal typing stop
     assert sent_json == [(123, {"type": "typing", "status": "stop"})]
 
-    # puis le model_dump_json() du DummyMsg
     expected = json.dumps({"content": "réponse_bot", "role": "assistant"})
     assert sent_text == [(123, expected)]
 

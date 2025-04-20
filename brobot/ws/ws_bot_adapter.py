@@ -27,7 +27,7 @@ class BotAdapter:
         """
         Retrieve the session from the session service.
         """
-        session = await self.session_service.get_complete_scenario(self.session_id)
+        session = await self.session_service.get_complete_session(self.session_id)
         if not session:
             logger.error(f"Session {self.session_id} not found.")
             raise Exception("Session not found")
@@ -72,25 +72,7 @@ class BotAdapter:
         Generate an answer to the user's message.
         """
 
-        session = await self._get_session()
-        current_chapter = await self._identify_current_chapter(session)
-        messages = self._convert_message(session.messages)
-        context = ScenarioContext(part_completed=False)
-
-        bot_answer = await generate_answer(
-            scenario=session.scenario,
-            current_chapter=current_chapter,
-            messages=messages,
-            context=context,
-        )
-
-        if bot_answer:
-            bot_message = await self.session_service.add_message(
-                self.session_id,
-                bot_answer,
-                "assistant",
-            )
-
+        if bot_message := await self.session_service.generate_answer(self.session_id):
             # Stop typing signal
             res = self.connection_manager.send_json(
                 self.session_id, {"type": "typing", "status": "stop"}
@@ -98,10 +80,9 @@ class BotAdapter:
             try:
                 await res
             except TypeError:
-                # stub synchrones peuvent retourner None
+                # stub synchrones return None
                 pass
 
-            # Envoi du message du bot
             res = self.connection_manager.send_text(
                 self.session_id, bot_message.model_dump_json()
             )
