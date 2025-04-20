@@ -1,10 +1,7 @@
-import datetime
 import pytest
-import asyncio
 import json
 from types import SimpleNamespace
 
-from brobot.dto import SessionMessageDTO
 from brobot.ws.ws_bot_adapter import BotAdapter
 from brobot.ws.manager import ConnectionManager
 

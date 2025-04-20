@@ -1,6 +1,4 @@
 import logging
-from brobot.bot.complete import generate_answer
-from brobot.bot.context import ScenarioContext
 from brobot.dto import (
     ScenarioChapterDTO,
     TrainingSessionWithScenarioAndMessagesDTO,
