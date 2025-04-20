@@ -13,6 +13,7 @@ from brobot.dto import (
 
 from brobot.bot.context import ScenarioContext
 from brobot.bot.complete import generate_answer
+from brobot.ws.manager import ConnectionManager
 
 
 class SessionService:
@@ -109,7 +110,10 @@ class SessionService:
         return [self.__session_to_training_session_dto(session) for session in sessions]
 
     async def get_or_create(
-        self, user_id: int, scenario_id: int
+        self,
+        user_id: int,
+        scenario_id: int,
+        connection_manager: ConnectionManager | None = None,
     ) -> TrainingSessionWithScenarioAndMessagesDTO:
         """
         Get or create a training session for a given user and scenario.
@@ -117,6 +121,7 @@ class SessionService:
         Args:
             user_id (int): The ID of the user.
             scenario_id (int): The ID of the scenario.
+            connection_manager (ConnectionManager, optional): The connection manager for WebSocket connections.
         Returns:
             TrainingSessionWithScenarioAndMessagesDTO: The training session.
         """
@@ -136,7 +141,13 @@ class SessionService:
 
         dto = self.__session_to_training_session_dto(new_session)
 
-        asyncio.create_task(self.generate_answer(new_session.id))
+        if connection_manager:
+            await connection_manager.send_json(
+                new_session.id,
+                {"type": "typing", "status": "start"},
+            )
+
+        asyncio.create_task(self.generate_answer(new_session.id, connection_manager))
 
         return dto
 
@@ -191,7 +202,9 @@ class SessionService:
         self.session.commit()
         return True
 
-    async def generate_answer(self, session_id: int) -> SessionMessageDTO:
+    async def generate_answer(
+        self, session_id: int, connection_manager: ConnectionManager | None = None
+    ) -> SessionMessageDTO:
         """
         Generate an answer to the user's message.
         """
@@ -231,5 +244,18 @@ class SessionService:
             bot_answer,
             "assistant",
         )
+
+        if connection_manager:
+            await connection_manager.send_text(
+                session_id, bot_message.model_dump_json()
+            )
+
+            await connection_manager.send_json(
+                session_id,
+                {
+                    "type": "typing",
+                    "status": "stop",
+                },
+            )
 
         return bot_message

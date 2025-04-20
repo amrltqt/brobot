@@ -59,7 +59,7 @@ async def api_create_training_session(
     Create a new training session for a given scenario.
     """
     service = SessionService(db)
-    session = await service.get_or_create(USER_ID, scenario_id)
+    session = await service.get_or_create(USER_ID, scenario_id, connection_manager)
     return session
 
 
