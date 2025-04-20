@@ -3,8 +3,9 @@ import pytest
 from sqlmodel import create_engine, SQLModel, Session, select
 
 from brobot.services.session import SessionService
-from brobot.models import TrainingSession, Scenario, SessionMessage
+from brobot.models import TrainingSession, Scenario, SessionMessage, ScenarioChapter
 from brobot.dto import TrainingSessionWithScenarioAndMessagesDTO
+from brobot.dto import SessionMessageDTO
 
 
 @pytest.fixture
@@ -126,3 +127,67 @@ async def test_delete_session_with_messages(session):
         select(SessionMessage).where(SessionMessage.session_id == training_session.id)
     ).all()
     assert len(remaining_messages) == 0
+
+
+@pytest.mark.asyncio
+async def test_get_complete_session_returns_model(session):
+    # Prepare a scenario and a training session
+    scenario = Scenario(title="Test Scenario", description="Desc")
+    session.add(scenario)
+    session.commit()
+    session.refresh(scenario)
+
+    training_session = TrainingSession(user_id=1, scenario_id=scenario.id)
+    session.add(training_session)
+    session.commit()
+
+    service = SessionService(session)
+    result = await service.get_complete_session(training_session.id)
+
+    assert result is not None
+    assert isinstance(result, TrainingSession)
+    assert result.id == training_session.id
+
+
+@pytest.mark.asyncio
+async def test_get_complete_session_returns_none(session):
+    service = SessionService(session)
+    result = await service.get_complete_session(9999)
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_generate_answer_persists_and_returns_message(session, monkeypatch):
+    # Prepare scenario and chapter
+    scenario = Scenario(title="Test Scenario", description="Desc")
+    session.add(scenario)
+    session.commit()
+    session.refresh(scenario)
+
+    chapter = ScenarioChapter(title="Chapter 1", order=1, scenario_id=scenario.id)
+    session.add(chapter)
+    session.commit()
+
+    # Create a training session
+    training_session = TrainingSession(user_id=1, scenario_id=scenario.id)
+    session.add(training_session)
+    session.commit()
+    session.refresh(training_session)
+
+    # Stub the generate_answer function in the service module
+    async def fake_generate_answer(scenario, current_chapter, messages, context):
+        return "Fake answer"
+
+    monkeypatch.setattr("brobot.services.session.generate_answer", fake_generate_answer)
+
+    service = SessionService(session)
+    result = await service.generate_answer(training_session.id)
+
+    assert isinstance(result, SessionMessageDTO)
+    assert result.content == "Fake answer"
+
+    # Verify the message was persisted in the database
+    db_messages = session.exec(
+        select(SessionMessage).where(SessionMessage.session_id == training_session.id)
+    ).all()
+    assert any(m.content == "Fake answer" for m in db_messages)
