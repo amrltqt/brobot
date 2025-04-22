@@ -164,7 +164,9 @@ async def test_generate_answer_persists_and_returns_message(session, monkeypatch
     session.commit()
     session.refresh(scenario)
 
-    chapter = ScenarioChapter(title="Chapter 1", order=1, scenario_id=scenario.id)
+    chapter = ScenarioChapter(
+        title="Chapter 1", order=1, scenario_id=scenario.id, content="Content"
+    )
     session.add(chapter)
     session.commit()
 
