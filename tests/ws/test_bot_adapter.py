@@ -6,20 +6,6 @@ from brobot.ws.ws_bot_adapter import BotAdapter
 from brobot.ws.manager import ConnectionManager
 
 
-# Fixture pour remplacer generate_answer par un stub
-@pytest.fixture(autouse=True)
-def patch_generate_answer(monkeypatch):
-    async def fake_generate_answer(scenario, current_chapter, messages, context):
-        # on vérifie qu'on reçoit bien des dicts role/content
-        assert all("role" in m and "content" in m for m in messages)
-        return "réponse_bot"
-
-    monkeypatch.setattr(
-        "brobot.ws.ws_bot_adapter.generate_answer",
-        fake_generate_answer,
-    )
-
-
 class DummySessionService:
     def __init__(self, session):
         self._session = session
