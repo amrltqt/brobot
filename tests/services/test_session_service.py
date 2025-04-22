@@ -10,7 +10,7 @@ from brobot.models import (
     ScenarioChapter,
     ChapterCompletion,
 )
-from brobot.dto import TrainingSessionWithScenarioAndMessagesDTO
+from brobot.dto import TrainingSessionDTO
 from brobot.dto import SessionMessageDTO
 
 
@@ -36,7 +36,7 @@ async def test_get_returns_training_session(session):
     result = await service.get(training_session.id)
 
     assert result is not None
-    assert isinstance(result, TrainingSessionWithScenarioAndMessagesDTO)
+    assert isinstance(result, TrainingSessionDTO)
     assert result.id == training_session.id
     assert result.scenario.title == "Test Scenario"
 
@@ -65,7 +65,7 @@ async def test_users_sessions_returns_training_session(session):
 
     assert result is not None
     assert len(result) == 1
-    assert isinstance(result[0], TrainingSessionWithScenarioAndMessagesDTO)
+    assert isinstance(result[0], TrainingSessionDTO)
     assert result[0].id == training_session.id
 
 
@@ -79,7 +79,7 @@ async def test_get_or_create_creates_new_training_session(session):
     result = await service.get_or_create(user_id=1, scenario_id=scenario.id)
 
     assert result is not None
-    assert isinstance(result, TrainingSessionWithScenarioAndMessagesDTO)
+    assert isinstance(result, TrainingSessionDTO)
     assert result.scenario.title == "Test Scenario"
 
     # Verify the session was created in the database

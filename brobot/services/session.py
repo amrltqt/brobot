@@ -16,7 +16,8 @@ from brobot.dto import (
     SessionMessageDTO,
     ScenarioWithChapterDTO,
     ScenarioChapterWithoutContentDTO,
-    TrainingSessionWithScenarioAndMessagesDTO,
+    TrainingSessionDTO,
+    CompletedChapterDTO,
 )
 
 from brobot.bot.context import ScenarioContext
@@ -39,7 +40,7 @@ class SessionService:
     @staticmethod
     def __session_to_training_session_dto(
         session: Session,
-    ) -> TrainingSessionWithScenarioAndMessagesDTO:
+    ) -> TrainingSessionDTO:
         """
         Convert a session to a TrainingSessionWithScenarioAndMessagesDTO.
         Args:
@@ -47,7 +48,7 @@ class SessionService:
         Returns:
             TrainingSessionWithScenarioAndMessagesDTO: The converted DTO.
         """
-        return TrainingSessionWithScenarioAndMessagesDTO(
+        return TrainingSessionDTO(
             id=session.id,
             created_at=session.created_at,
             scenario=ScenarioWithChapterDTO(
@@ -73,6 +74,14 @@ class SessionService:
                 )
                 for message in session.messages
             ],
+            completions=[
+                CompletedChapterDTO(
+                    chapter_id=completion.chapter_id,
+                    message_id=completion.message_id,
+                    completed_at=completion.completed_at,
+                )
+                for completion in session.completions
+            ],
         )
 
     async def get_complete_session(self, session_id: int) -> TrainingSession:
@@ -86,7 +95,7 @@ class SessionService:
         statement = select(TrainingSession).where(TrainingSession.id == session_id)
         return self.session.exec(statement).first()
 
-    async def get(self, session_id: int) -> TrainingSessionWithScenarioAndMessagesDTO:
+    async def get(self, session_id: int) -> TrainingSessionDTO:
         """
         Retrieve a training session by its ID.
         Args:
@@ -115,9 +124,7 @@ class SessionService:
         self.session.refresh(completion)
         return completion
 
-    async def users_sessions(
-        self, user_id: int
-    ) -> list[TrainingSessionWithScenarioAndMessagesDTO]:
+    async def users_sessions(self, user_id: int) -> list[TrainingSessionDTO]:
         """
         Retrieve a training session for a given user.
 
@@ -139,7 +146,7 @@ class SessionService:
         user_id: int,
         scenario_id: int,
         connection_manager: ConnectionManager | None = None,
-    ) -> TrainingSessionWithScenarioAndMessagesDTO:
+    ) -> TrainingSessionDTO:
         """
         Get or create a training session for a given user and scenario.
 

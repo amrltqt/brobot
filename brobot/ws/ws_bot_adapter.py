@@ -1,7 +1,7 @@
 import logging
 from brobot.dto import (
     ScenarioChapterDTO,
-    TrainingSessionWithScenarioAndMessagesDTO,
+    TrainingSessionDTO,
     SessionMessageDTO,
 )
 from brobot.services.session import SessionService
@@ -32,7 +32,7 @@ class BotAdapter:
         return session
 
     async def _identify_current_chapter(
-        self, session: TrainingSessionWithScenarioAndMessagesDTO
+        self, session: TrainingSessionDTO
     ) -> ScenarioChapterDTO:
         """
         Identify the current chapter based on the session's messages.

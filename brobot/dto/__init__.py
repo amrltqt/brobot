@@ -9,7 +9,8 @@ from brobot.dto.scenario_chapter import (
 from brobot.dto.scenario_with_chapter import ScenarioWithChapterDTO
 from brobot.dto.session_messages import SessionMessageDTO
 from brobot.dto.session_with_scenarios import (
-    TrainingSessionWithScenarioAndMessagesDTO,
+    TrainingSessionDTO,
+    CompletedChapterDTO,
 )
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     "ScenarioChapterWithoutContentDTO",
     "ScenarioWithChapterDTO",
     "SessionMessageDTO",
-    "TrainingSessionWithScenarioAndMessagesDTO",
+    "CompletedChapterDTO",
+    "TrainingSessionDTO",
 ]
