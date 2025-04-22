@@ -7,11 +7,14 @@ import type {
     TrainingSessionDTO,
 } from "@/models/session";
 import { upsertAndSortMessages } from "@/utils/messages";
+import { useHeader } from "@/context/header-context";
 
 export function useChatService(
     userId: string,
     sessionId: number
 ) {
+    const { setHeader } = useHeader();
+
     // Local state for chat messages
     const [messages, setMessages] = useState<SessionMessageDTO[]>([]);
     const [typing, setTyping] = useState(false);
@@ -27,6 +30,9 @@ export function useChatService(
         if (session?.messages) {
             setMessages(session.messages);
         }
+
+        setHeader(session ? session.scenario.title : "Chat session");
+
     }, [session]);
 
     // Connection status: connecting | connected | reconnecting

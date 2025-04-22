@@ -22,16 +22,15 @@ export default function Page({ params }: ChatPageProps) {
         sendMessage
     } = useChatService("1", parseInt(id, 10));
 
-    const handleSendMessage = (message: string) => {
-        sendMessage(message);
-    };
 
     if (error) return <ErrorDisplay message={error.message} />;
     if (!session || isLoading) return <Loading message="Loading session..." />;
 
     return (
         <div className="flex flex-col h-full py-2">
-            <ChatForm connectionStatus={connectionStatus} messages={messages} sendMessage={handleSendMessage} typing={typing} />
+            <ChatForm connectionStatus={connectionStatus}
+                messages={messages} sendMessage={sendMessage}
+                typing={typing} />
         </div>
     );
 }

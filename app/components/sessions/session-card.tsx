@@ -1,4 +1,4 @@
-import { Loader2Icon, MessageSquare, RotateCcwIcon, Trash2 } from "lucide-react";
+import { MessageSquare, RotateCcwIcon, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { TrainingSessionDTO } from "@/models/session";

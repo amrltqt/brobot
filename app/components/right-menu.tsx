@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Scenario } from "@/lib/models"
-import { Info } from "lucide-react"
 
 export interface RightMenuProps {
     scenario: Scenario | null;

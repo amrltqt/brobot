@@ -2,19 +2,24 @@
 
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { ScenarioRead } from "@/models/scenario";
 import { API_BASE, fetcher } from "@/utils/api";
 import { TrainingSessionDTO } from "@/models/session";
-
+import { useHeader } from "@/context/header-context";
 
 
 export function useScenarios() {
     const router = useRouter();
+    const { setHeader } = useHeader();
     const { data, error, mutate } = useSWR<ScenarioRead[]>(
         `${API_BASE}/scenarios`,
         fetcher
     );
+
+    useEffect(() => {
+        setHeader("Home");
+    }, []);
 
     const deleteScenario = useCallback(
         async (id: number) => {

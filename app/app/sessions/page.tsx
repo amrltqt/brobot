@@ -1,27 +1,15 @@
 "use client";
 
-import useSWR from "swr";
-import { fetchMySessions, deleteSession } from "@/api/sessions";
-import { TrainingSessionDTO } from "@/models/session";
 import SessionCard from "@/components/sessions/session-card";
 import { Empty } from "@/components/common/empty";
 import { Loading } from "@/components/common/loading";
 import { ErrorDisplay } from "@/components/common/error-display";
-
-const fetcher = () => fetchMySessions({});
+import { useSessions } from "@/hooks/use-sessions";
 
 
 export default function Page() {
-    const { data: sessions, mutate, error } = useSWR<TrainingSessionDTO[]>("sessions", fetcher);
 
-    const onDelete = async (id: number) => {
-        try {
-            await deleteSession({ sessionId: id });
-            mutate();
-        } catch {
-            console.error("Failed to delete session");
-        }
-    };
+    const { sessions, error, onDelete } = useSessions();
 
     if (error) return <ErrorDisplay message="Failed to load sessions" />;
     if (!sessions) return <Loading message="Loading sessions..." />;

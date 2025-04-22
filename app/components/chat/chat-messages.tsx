@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react"
 import { UserMessage } from "./user-message"
 import { AssistantMessage } from "./assistant-message"
+import { SessionMessageDTO } from "@/models/session"
 
-export function ChatMessages({ messages }: { messages: any[] }) {
+export function ChatMessages({ messages }: { messages: SessionMessageDTO[] }) {
     const endOfMessagesRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
