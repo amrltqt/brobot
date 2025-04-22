@@ -1,23 +1,9 @@
 import pytest
-import asyncio
 import json
 from types import SimpleNamespace
+
 from brobot.ws.ws_bot_adapter import BotAdapter
 from brobot.ws.manager import ConnectionManager
-
-
-# Fixture pour remplacer generate_answer par un stub
-@pytest.fixture(autouse=True)
-def patch_generate_answer(monkeypatch):
-    async def fake_generate_answer(scenario, current_chapter, messages, context):
-        # on vérifie qu'on reçoit bien des dicts role/content
-        assert all("role" in m and "content" in m for m in messages)
-        return "réponse_bot"
-
-    monkeypatch.setattr(
-        "brobot.ws.ws_bot_adapter.generate_answer",
-        fake_generate_answer,
-    )
 
 
 class DummySessionService:
@@ -25,7 +11,7 @@ class DummySessionService:
         self._session = session
         self.added = []
 
-    async def get_complete_scenario(self, session_id):
+    async def get_complete_session(self, session_id):
         return self._session
 
     async def add_message(self, session_id, content, role):
@@ -41,13 +27,29 @@ class DummySessionService:
         self.added.append((session_id, content, role))
         return DummyMsg(content, role)
 
+    async def generate_answer(self, session_id, connection_manager=None):
+        if not self._session:
+            raise Exception("Session not found")
+
+        if not self._session.scenario:
+            raise Exception("Scenario not found")
+
+        if (
+            not self._session.scenario.chapters
+            or len(self._session.scenario.chapters) == 0
+        ):
+            raise Exception("No chapters found")
+
+        return await self.add_message(
+            session_id=session_id, role="assistant", content="bot_answer"
+        )
+
 
 @pytest.mark.asyncio
 async def test_answer_user_message_success(monkeypatch):
-    # Prépare un "session" minimaliste
     dummy_chapter = SimpleNamespace(id=1)
     dummy_scenario = SimpleNamespace(chapters=[dummy_chapter])
-    # 1 message utilisateur
+
     dummy_msg = SimpleNamespace(role="user", content="bonjour")
     session_obj = SimpleNamespace(scenario=dummy_scenario, messages=[dummy_msg])
 
@@ -61,15 +63,13 @@ async def test_answer_user_message_success(monkeypatch):
     adapter = BotAdapter(session_id=123, session_service=service, connection_manager=cm)
     await adapter.answer_user_message()
 
-    # get_complete_scenario a renvoyé notre session
+    # get_complete_session a renvoyé notre session
     # add_message doit avoir été appelé avec le résultat de generate_answer
-    assert service.added == [(123, "réponse_bot", "assistant")]
+    assert service.added == [(123, "bot_answer", "assistant")]
 
-    # on a d'abord envoyé le signal typing stop
     assert sent_json == [(123, {"type": "typing", "status": "stop"})]
 
-    # puis le model_dump_json() du DummyMsg
-    expected = json.dumps({"content": "réponse_bot", "role": "assistant"})
+    expected = json.dumps({"content": "bot_answer", "role": "assistant"})
     assert sent_text == [(123, expected)]
 
 

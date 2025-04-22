@@ -23,6 +23,6 @@ export function upsertAndSortMessages(
             [...messages.slice(0, idx), newMsg, ...messages.slice(idx + 1)]
             : // ajoute en fin
             [...messages, newMsg];
-
+    console.log(updated)
     return sortMessagesByDate(updated);
 }

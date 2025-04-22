@@ -23,6 +23,10 @@ async function apiRequest<T>(
         throw new Error(`API request failed: ${response.statusText}`);
     }
 
+    if (response.status === 204) {
+        return {} as T; // No content
+    }
+
     return response.json();
 }
 

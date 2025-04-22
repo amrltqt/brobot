@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends, status, WebSocket
 from sqlmodel import Session
 
 from brobot.database import get_session
-from brobot.dto import TrainingSessionWithScenarioAndMessagesDTO
+from brobot.dto import TrainingSessionDTO
 from brobot.services.session import SessionService
 from brobot.ws.manager import ConnectionManager
 from brobot.ws.ws_bot_adapter import BotAdapter
@@ -27,7 +27,7 @@ router = APIRouter()
 USER_ID = 1  # Placeholder for user ID, should be replaced with actual user ID from authentication
 
 
-@router.get("/{session_id}", response_model=TrainingSessionWithScenarioAndMessagesDTO)
+@router.get("/{session_id}", response_model=TrainingSessionDTO)
 async def api_get_training_session(session_id: int, db: Session = Depends(get_session)):
     """
     Retrieve a training session and all its associated messages.
@@ -40,14 +40,13 @@ async def api_get_training_session(session_id: int, db: Session = Depends(get_se
     return session
 
 
-@router.get("/", response_model=List[TrainingSessionWithScenarioAndMessagesDTO])
+@router.get("/", response_model=List[TrainingSessionDTO])
 async def api_my_training_sessions(db: Session = Depends(get_session)):
     """
     Retrieve all training sessions from the database.
     """
     service = SessionService(db)
     sessions = await service.users_sessions(USER_ID)
-    print(sessions)
 
     return sessions
 
@@ -60,7 +59,7 @@ async def api_create_training_session(
     Create a new training session for a given scenario.
     """
     service = SessionService(db)
-    session = await service.get_or_create(USER_ID, scenario_id)
+    session = await service.get_or_create(USER_ID, scenario_id, connection_manager)
     return session
 
 
@@ -72,8 +71,9 @@ async def api_delete_training_session(
     Delete a training session by its ID.
     """
     service = SessionService(db)
-    await service.delete(session_id)
-    return {"message": "Session deleted successfully"}
+    success = await service.delete(session_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Session not found")
 
 
 @router.websocket("/ws/{session_id}")
