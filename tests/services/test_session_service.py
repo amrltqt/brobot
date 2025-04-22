@@ -3,7 +3,13 @@ import pytest
 from sqlmodel import create_engine, SQLModel, Session, select
 
 from brobot.services.session import SessionService
-from brobot.models import TrainingSession, Scenario, SessionMessage, ScenarioChapter
+from brobot.models import (
+    TrainingSession,
+    Scenario,
+    SessionMessage,
+    ScenarioChapter,
+    ChapterCompletion,
+)
 from brobot.dto import TrainingSessionWithScenarioAndMessagesDTO
 from brobot.dto import SessionMessageDTO
 
@@ -85,7 +91,7 @@ async def test_get_or_create_creates_new_training_session(session):
 
 
 @pytest.mark.asyncio
-async def test_delete_session_with_messages(session):
+async def test_delete_session_with_messages_and_completion(session):
     # Create a scenario
     scenario = Scenario(title="Test Scenario", description="Description")
     session.add(scenario)
@@ -104,6 +110,15 @@ async def test_delete_session_with_messages(session):
         content="Message 2", role="assistant", session_id=training_session.id
     )
     session.add_all([message1, message2])
+    session.commit()
+
+    # Add a chapter completion
+    chapter_completion = ChapterCompletion(
+        chapter_id=1,
+        session_id=training_session.id,
+        message_id=message1.id,
+    )
+    session.add(chapter_completion)
     session.commit()
 
     # Verify messages exist in the database

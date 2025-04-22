@@ -223,6 +223,10 @@ class SessionService:
         for message in session.messages:
             self.session.delete(message)
 
+        # Ensure completions are deleted
+        for completion in session.completions:
+            self.session.delete(completion)
+
         self.session.delete(session)
         self.session.commit()
         return True
