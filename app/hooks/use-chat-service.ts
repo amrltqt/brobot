@@ -4,7 +4,7 @@ import { fetchSession } from "@/api/sessions";
 import { useWebsocket } from "./use-websocket";
 import type {
     SessionMessageDTO,
-    TrainingSessionWithScenarioAndMessagesDTO,
+    TrainingSessionDTO,
 } from "@/models/session";
 import { upsertAndSortMessages } from "@/utils/messages";
 
@@ -17,7 +17,7 @@ export function useChatService(
     const [typing, setTyping] = useState(false);
 
     // Fetch session metadata & history
-    const { data: session, error: restError } = useSWR<TrainingSessionWithScenarioAndMessagesDTO>(
+    const { data: session, error: restError } = useSWR<TrainingSessionDTO>(
         sessionId.toString(),
         () => fetchSession({ sessionId })
     );

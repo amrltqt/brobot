@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { useCallback } from "react";
 import { ScenarioRead } from "@/models/scenario";
 import { API_BASE, fetcher } from "@/utils/api";
-import { TrainingSessionWithScenarioAndMessagesDTO } from "@/models/session";
+import { TrainingSessionDTO } from "@/models/session";
 
 
 
@@ -45,7 +45,7 @@ export function useScenarios() {
             }
 
             // Revalidation
-            const session: TrainingSessionWithScenarioAndMessagesDTO = await res.json();
+            const session: TrainingSessionDTO = await res.json();
 
             router.push(`/sessions/${session.id}`);
         },

@@ -12,7 +12,7 @@ export interface SessionMessageDTO {
     role: string; // e.g., "user" or "assistant"
 }
 
-export interface TrainingSessionWithScenarioAndMessagesDTO {
+export interface TrainingSessionDTO {
     /**
      * DTO for a training session with its associated scenario and messages.
      */
@@ -20,4 +20,9 @@ export interface TrainingSessionWithScenarioAndMessagesDTO {
     created_at: string; // ISO 8601 string
     scenario: ScenarioWithChapterDTO;
     messages: SessionMessageDTO[];
+    completions: {
+        chapter_id: number;
+        message_id: number;
+        completed_at: string; // ISO 8601 string
+    }[];
 }

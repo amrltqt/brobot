@@ -1,4 +1,4 @@
-import { TrainingSessionWithScenarioAndMessagesDTO } from "../models/session";
+import { TrainingSessionDTO } from "../models/session";
 
 const API_URL = "http://localhost:8000/sessions";
 
@@ -36,8 +36,8 @@ interface FetchSessionOptions {
 
 export async function fetchSession(
     { sessionId }: FetchSessionOptions
-): Promise<TrainingSessionWithScenarioAndMessagesDTO> {
-    return apiRequest<TrainingSessionWithScenarioAndMessagesDTO>(`/${sessionId}`, {
+): Promise<TrainingSessionDTO> {
+    return apiRequest<TrainingSessionDTO>(`/${sessionId}`, {
         method: "GET",
     });
 }
@@ -46,8 +46,8 @@ interface FetchMySessionsOptions { }
 
 export async function fetchMySessions(
     { }: FetchMySessionsOptions
-): Promise<TrainingSessionWithScenarioAndMessagesDTO[]> {
-    return apiRequest<TrainingSessionWithScenarioAndMessagesDTO[]>(`/`, {
+): Promise<TrainingSessionDTO[]> {
+    return apiRequest<TrainingSessionDTO[]>(`/`, {
         method: "GET",
     });
 }
