@@ -4,24 +4,28 @@ import useSWR from "swr";
 import { fetchMySessions, deleteSession } from "@/api/sessions";
 import { TrainingSessionDTO } from "@/models/session";
 import SessionCard from "@/components/sessions/session-card";
+import { Empty } from "@/components/common/empty";
+import { Loading } from "@/components/common/loading";
+import { ErrorDisplay } from "@/components/common/error-display";
 
 const fetcher = () => fetchMySessions({});
 
 
 export default function Page() {
-    const { data: sessions, mutate } = useSWR<TrainingSessionDTO[]>("sessions", fetcher);
+    const { data: sessions, mutate, error } = useSWR<TrainingSessionDTO[]>("sessions", fetcher);
 
     const onDelete = async (id: number) => {
         try {
             await deleteSession({ sessionId: id });
             mutate();
         } catch {
-            console.error("Erreur suppression");
+            console.error("Failed to delete session");
         }
     };
 
-    if (!sessions) return <div className="flex justify-center py-10">Loading...</div>;
-    if (sessions.length === 0) return <div className="flex justify-center py-10">Aucune session</div>;
+    if (error) return <ErrorDisplay message="Failed to load sessions" />;
+    if (!sessions) return <Loading message="Loading sessions..." />;
+    if (sessions.length === 0) return <Empty message="You have no sessions yet." />;
 
     return (
         <div className="flex flex-col min-h-screen py-4 space-y-4">

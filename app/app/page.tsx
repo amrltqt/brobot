@@ -2,7 +2,7 @@
 
 import { ScenarioCard } from "@/components/scenarios/scenario-card";
 import { Loading } from "@/components/common/loading";
-import { ErrorDisplay } from "@/components/common/error";
+import { ErrorDisplay } from "@/components/common/error-display";
 import { Empty } from "@/components/common/empty";
 
 import { useScenarios } from "@/hooks/use-scenarios";

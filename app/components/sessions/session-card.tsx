@@ -1,4 +1,4 @@
-import { Loader2Icon, MessageSquare, RotateCcwIcon } from "lucide-react";
+import { Loader2Icon, MessageSquare, RotateCcwIcon, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { TrainingSessionDTO } from "@/models/session";
@@ -42,12 +42,13 @@ export default function SessionCard({ session, onDelete }: SessionCardProps) {
 
             <div className="space-x-2 flex items-center">
                 <Button variant="destructive" onClick={() => onDelete(session.id)}>
-                    Supprimer
+                    <Trash2 className="mr-1 h-4 w-4" />
+                    Delete
                 </Button>
                 <Button asChild>
                     <Link href={`/sessions/${session.id}`} passHref>
                         <RotateCcwIcon className="mr-1 h-4 w-4" />
-                        Continuer
+                        Continue
                     </Link>
                 </Button>
             </div>

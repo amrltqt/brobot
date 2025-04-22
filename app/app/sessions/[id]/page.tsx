@@ -3,6 +3,8 @@
 import React from "react";
 import { ChatForm } from "@/components/chat/chat-form";
 import { useChatService } from "@/hooks/use-chat-service";
+import { ErrorDisplay } from "@/components/common/error-display";
+import { Loading } from "@/components/common/loading";
 
 interface ChatPageProps {
     params: Promise<{ id: string }>;
@@ -24,8 +26,8 @@ export default function Page({ params }: ChatPageProps) {
         sendMessage(message);
     };
 
-    if (error) return <div>Error loading conversation</div>;
-    if (!session || isLoading) return <div>Loading...</div>;
+    if (error) return <ErrorDisplay message={error.message} />;
+    if (!session || isLoading) return <Loading message="Loading session..." />;
 
     return (
         <div className="flex flex-col h-full py-2">

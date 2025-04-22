@@ -17,7 +17,7 @@ export default function ChapterCompletions({ chapters }: ChapterCompletionsProps
                     <div key={chapter.id} className="flex items-center gap-4">
                         <div className="z-10">
                             {chapter.completed ? (
-                                <div className="rounded-full bg-green-500 p-1.5">
+                                <div className="rounded-full bg-primary p-1.5">
                                     <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
                                 </div>
                             ) : (

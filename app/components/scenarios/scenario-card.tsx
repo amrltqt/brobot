@@ -46,11 +46,11 @@ export function ScenarioCard({
             <CardFooter className="flex justify-end space-x-2 p-2">
                 <Button size="sm" onClick={onStart}>
                     <Play className="mr-1 h-4 w-4" />
-                    Démarrer
+                    Start
                 </Button>
                 <Button size="sm" variant="destructive" onClick={onDelete}>
                     <Trash2 className="mr-1 h-4 w-4" />
-                    Supprimer
+                    Delete
                 </Button>
             </CardFooter>
         </Card>

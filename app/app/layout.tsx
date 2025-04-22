@@ -10,8 +10,8 @@ import { MainSidebar } from "@/components/main-sidebar"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "OpenAI and AI SDK Chatbot",
-  description: "A simple chatbot built using the AI SDK and gpt-4o-mini.",
+  title: "Brobot - the learning assistant",
+  description: "Learn with ease with Brobot",
 }
 
 export default function Layout({ children }: { children: ReactNode }) {
