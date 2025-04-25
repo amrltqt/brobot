@@ -10,6 +10,7 @@ dependencies = [
     "loguru>=0.7.3",
     "openai>=1.68.2",
     "openai-agents>=0.0.6",
+    "psycopg2-binary>=2.9.10",
     "pydantic>=2.10.6",
     "pydantic-settings>=2.8.1",
     "pytest>=8.3.5",

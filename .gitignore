@@ -12,3 +12,5 @@ wheels/
 .mypy_cache/
 .pytest_cache/
 .vscode/
+
+.env

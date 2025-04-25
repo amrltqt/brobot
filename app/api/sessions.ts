@@ -1,6 +1,6 @@
+import { API_URL } from "@/utils/api";
 import { TrainingSessionDTO } from "../models/session";
 
-const API_URL = "http://localhost:8000/sessions";
 
 const BASE_HEADERS = {
     "Content-Type": "application/json",
