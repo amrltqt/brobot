@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { useCallback, useEffect } from "react";
 import { ScenarioRead } from "@/models/scenario";
-import { API_BASE, fetcher } from "@/utils/api";
+import { API_URL, fetcher } from "@/utils/api";
 import { TrainingSessionDTO } from "@/models/session";
 import { useHeader } from "@/context/header-context";
 
@@ -13,7 +13,7 @@ export function useScenarios() {
     const router = useRouter();
     const { setHeader } = useHeader();
     const { data, error, mutate } = useSWR<ScenarioRead[]>(
-        `${API_BASE}/scenarios`,
+        `${API_URL}/scenarios`,
         fetcher
     );
 
@@ -27,7 +27,7 @@ export function useScenarios() {
             const next = data?.filter((s) => s.id !== id) || [];
             mutate(next, { optimisticData: next, rollbackOnError: true });
 
-            const res = await fetch(`${API_BASE}/scenarios/${id}`, {
+            const res = await fetch(`${API_URL}/scenarios/${id}`, {
                 method: "DELETE",
             });
             if (!res.ok) {
@@ -41,7 +41,7 @@ export function useScenarios() {
 
     const startScenario = useCallback(
         async (id: number) => {
-            const res = await fetch(`${API_BASE}/sessions/${id}`, {
+            const res = await fetch(`${API_URL}/sessions/${id}`, {
                 method: "POST",
             });
 

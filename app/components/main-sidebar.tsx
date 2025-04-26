@@ -60,7 +60,7 @@ export function MainSidebar() {
                 </SidebarGroup>
             </SidebarContent>
             <SidebarFooter>
-                <div className="px-4 py-2 text-xs text-muted-foreground">© {new Date().getFullYear()} AI Chatbot</div>
+                <div className="px-4 py-2 text-xs text-muted-foreground">Brobot</div>
             </SidebarFooter>
         </Sidebar>
     )

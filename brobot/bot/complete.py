@@ -7,7 +7,7 @@ from agents import (
 from agents.items import ResponseInputItemParam
 
 from brobot.bot.context import ScenarioContext
-from brobot.bot.agents import trainer
+from brobot.bot.agents import prepared_agent
 from brobot.models import Scenario, ScenarioChapter
 
 
@@ -40,8 +40,13 @@ async def generate_answer(
     for message in messages:
         focused_messages.append(message)
 
+    agent = prepared_agent(
+        scenario=scenario,
+        chapter=current_chapter,
+    )
+
     with trace("training"):
         result = await Runner.run(
-            starting_agent=trainer, input=focused_messages, context=context
+            starting_agent=agent, input=focused_messages, context=context
         )
         return result.final_output

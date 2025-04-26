@@ -9,6 +9,11 @@ It allows students to follow step-by-step lessons created by teachers, with pers
 
 ## Installation
 
+Before you start, ensure you have the following prerequisites installed:
+* [Python 3.12+](https://www.python.org/downloads/)
+* [Docker](https://docs.docker.com/get-docker/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
+
 
 You have to initialize a `.env.sh` file in the root of the project. You can use the provided `.env.sh.example` file as a template. 
 
@@ -18,6 +23,7 @@ cp .env.sh.example .env.sh
 
 Then, open the `.env.sh` file and set the environment variables according to your configuration.
 You can set the following environment variables in the `.env.sh` file:
+
 * `DATABASE_URL`: The URL of the database to use. (exemple: `postgresql://brobot:password@postgres:5432/brobot`)
 * `OPENAI_API_KEY`: The OpenAI API key to use for the bot. (exemple: `sk-...`)
 * `BROBOT_DATABASE_USER`: The user to use for the database. (exemple: `brobot`)
@@ -100,8 +106,6 @@ npm run dev
 ```
 
 This will start the web client on `http://localhost:3000`.
-
-If you already have some running services on those port, usually fastapi and nextjs will run on `http://localhost:8001` and `http://localhost:3001` respectively.
 
 Once the app is started, you should add a first scenario. 
 I started brobot with in mind the idea of training people in SQL, so I created a first example available in the `/data` folder.
