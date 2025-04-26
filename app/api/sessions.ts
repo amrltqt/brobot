@@ -37,7 +37,7 @@ interface FetchSessionOptions {
 export async function fetchSession(
     { sessionId }: FetchSessionOptions
 ): Promise<TrainingSessionDTO> {
-    return apiRequest<TrainingSessionDTO>(`/${sessionId}`, {
+    return apiRequest<TrainingSessionDTO>(`/sessions/${sessionId}`, {
         method: "GET",
     });
 }
@@ -47,7 +47,7 @@ interface FetchMySessionsOptions { }
 export async function fetchMySessions(
     { }: FetchMySessionsOptions
 ): Promise<TrainingSessionDTO[]> {
-    return apiRequest<TrainingSessionDTO[]>(`/`, {
+    return apiRequest<TrainingSessionDTO[]>(`/sessions`, {
         method: "GET",
     });
 }

@@ -13,7 +13,7 @@ export default function Page() {
 
     if (error) return <ErrorDisplay message="Failed to load sessions" />;
     if (!sessions) return <Loading message="Loading sessions..." />;
-    if (sessions.length === 0) return <Empty message="You have no sessions yet." />;
+    if (sessions && sessions.length === 0) return <Empty message="You have no sessions yet." />;
 
     return (
         <div className="flex flex-col min-h-screen py-4 space-y-4">

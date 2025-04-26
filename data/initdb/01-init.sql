@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS scenario_chapter (
 -- Table: training_session
 CREATE TABLE IF NOT EXISTS training_session (
     id INTEGER PRIMARY KEY,
-    user_id TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
+
     scenario_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user_id, scenario_id),

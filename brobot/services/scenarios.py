@@ -1,4 +1,7 @@
 from typing import Optional, List
+
+import requests
+
 from sqlmodel import Session, select
 from brobot.models import Scenario, ScenarioChapter
 
@@ -124,3 +127,73 @@ class ScenarioService:
 
         self.session.commit()
         return scenario_model
+
+    def import_github(self, url: str) -> Optional[ScenarioWithChapterDTO]:
+        """
+        Import a scenario from a GitHub URL.
+
+        Args:
+            url (str): The GitHub URL to import the scenario from.
+
+        Returns:
+            Optional[ScenarioWithChapterDTO]: The imported scenario with its chapters, or None if not found.
+        """
+
+        # Check if the URL is valid
+        # https://github.com/amrltqt/brobot/blob/master/data/scenarios/introduction-sql.json
+
+        # Extract the file path from the URL to get the raw content
+        # https://raw.githubusercontent.com/amrltqt/brobot/master/data/scenarios/introduction-sql.json
+
+        if not url.startswith("https://github.com/"):
+            raise ValueError("Invalid GitHub URL")
+
+        if not url.endswith(".json"):
+            raise ValueError("Invalid file type. Only .json files are supported.")
+
+        # Extract the file path from the URL
+        file_path = url.split("github.com/")[1].replace("blob/", "").replace(" ", "%20")
+        raw_url = f"https://raw.githubusercontent.com/{file_path}"
+
+        # Fetch the content from the raw URL
+
+        response = requests.get(raw_url)
+        if response.status_code != 200:
+            raise ValueError("Failed to fetch the file from GitHub")
+        content = response.json()
+        if not content:
+            raise ValueError("Empty content")
+
+        # Create the scenario and chapters
+        scenario = Scenario(
+            title=content["title"],
+            description=content["description"],
+        )
+        self.session.add(scenario)
+        self.session.commit()
+        self.session.refresh(scenario)
+
+        for chapter in content["chapters"]:
+            chapter_model = ScenarioChapter(
+                title=chapter["title"],
+                order=chapter["order"],
+                content=chapter["content"],
+                scenario_id=scenario.id,
+            )
+            self.session.add(chapter_model)
+        self.session.commit()
+
+        return ScenarioWithChapterDTO(
+            id=scenario.id,
+            title=scenario.title,
+            description=scenario.description,
+            created_at=scenario.created_at,
+            chapters=[
+                ScenarioChapterWithoutContentDTO(
+                    id=chapter_model.id,
+                    title=chapter_model.title,
+                    order=chapter_model.order,
+                )
+                for chapter_model in scenario.chapters
+            ],
+        )

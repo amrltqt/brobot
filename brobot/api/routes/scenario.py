@@ -41,3 +41,18 @@ async def delete_scenario_route(
     success = service.delete(scenario_id, session)
     if not success:
         raise HTTPException(status_code=404, detail="Scenario not found")
+
+
+@router.post("/import/github", status_code=201)
+async def import_scenario_from_github(
+    url: str, session: Session = Depends(get_session)
+):
+    """
+    Import a scenario from a GitHub repository.
+    """
+    service = ScenarioService(session)
+    scenario = service.import_github(url)
+    if not scenario:
+        raise HTTPException(status_code=400, detail="Failed to import scenario")
+
+    return scenario

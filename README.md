@@ -14,12 +14,16 @@ Before you start, ensure you have the following prerequisites installed:
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
-You have to initialize a `.env` file in the root of the project. You can use the provided `.env.example` file as a template. 
+
+You have to initialize a `.env.sh` file in the root of the project. You can use the provided `.env.sh.example` file as a template. 
 
 ```shell
-cp .env.example .env
+cp .env.sh.example .env.sh
 ```
-You can set the following environment variables in the `.env` file:
+
+Then, open the `.env.sh` file and set the environment variables according to your configuration.
+You can set the following environment variables in the `.env.sh` file:
+
 * `DATABASE_URL`: The URL of the database to use. (exemple: `postgresql://brobot:password@postgres:5432/brobot`)
 * `OPENAI_API_KEY`: The OpenAI API key to use for the bot. (exemple: `sk-...`)
 * `BROBOT_DATABASE_USER`: The user to use for the database. (exemple: `brobot`)
@@ -27,12 +31,12 @@ You can set the following environment variables in the `.env` file:
 * `BROBOT_DATABASE_NAME`: The name of the database to use. (exemple: `brobot`)
 
 ```shell
-OPENAI_API_KEY=<your_openai_api_key>
-DATABASE_URL=postgresql://brobot:password@postgres:5432/brobot
+export OPENAI_API_KEY=<your_openai_api_key>
+export DATABASE_URL=postgresql://brobot:password@postgres:5432/brobot
 
-BROBOT_DATABASE_USER=brobot
-BROBOT_DATABASE_PASSWORD=password
-BROBOT_DATABASE_NAME=brobot
+export BROBOT_DATABASE_USER=brobot
+export BROBOT_DATABASE_PASSWORD=password
+export BROBOT_DATABASE_NAME=brobot
 ```
 
 Then simplest way to start is to use the provided `docker compose` file.
