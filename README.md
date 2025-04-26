@@ -9,13 +9,51 @@ It allows students to follow step-by-step lessons created by teachers, with pers
 
 ## Installation
 
+Before you start, ensure you have the following prerequisites installed:
+* [Python 3.12+](https://www.python.org/downloads/)
+* [Docker](https://docs.docker.com/get-docker/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
 
-### Database
-
-Initialize a local SQLite database for development:
+You have to initialize a `.env` file in the root of the project. You can use the provided `.env.example` file as a template. 
 
 ```shell
-sqlite3 database.db < data/schema.sql
+cp .env.example .env
+```
+You can set the following environment variables in the `.env` file:
+* `DATABASE_URL`: The URL of the database to use. (exemple: `postgresql://brobot:password@postgres:5432/brobot`)
+* `OPENAI_API_KEY`: The OpenAI API key to use for the bot. (exemple: `sk-...`)
+* `BROBOT_DATABASE_USER`: The user to use for the database. (exemple: `brobot`)
+* `BROBOT_DATABASE_PASSWORD`: The password to use for the database. (exemple: `password`)
+* `BROBOT_DATABASE_NAME`: The name of the database to use. (exemple: `brobot`)
+
+```shell
+OPENAI_API_KEY=<your_openai_api_key>
+DATABASE_URL=postgresql://brobot:password@postgres:5432/brobot
+
+BROBOT_DATABASE_USER=brobot
+BROBOT_DATABASE_PASSWORD=password
+BROBOT_DATABASE_NAME=brobot
+```
+
+Then simplest way to start is to use the provided `docker compose` file.
+
+```shell
+git clone git@github.com:amrltqt/brobot.git
+cd brobot
+docker compose build && docker compose up
+```
+
+This will initialize a database and start a server plus a web client available on `http://localhost:3000`.
+
+
+## Development
+If you want to run the project locally without Docker, you can do so by following these steps:
+
+1. Clone the repository:
+
+```shell
+git clone git@github.com:amrltqt/brobot.git
+cd brobot
 ```
 
 ### Web server 
@@ -64,8 +102,6 @@ npm run dev
 ```
 
 This will start the web client on `http://localhost:3000`.
-
-If you already have some running services on those port, usually fastapi and nextjs will run on `http://localhost:8001` and `http://localhost:3001` respectively.
 
 Once the app is started, you should add a first scenario. 
 I started brobot with in mind the idea of training people in SQL, so I created a first example available in the `/data` folder.
