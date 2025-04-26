@@ -12,3 +12,8 @@ wheels/
 .mypy_cache/
 .pytest_cache/
 .vscode/
+
+
+# Environment variable files
+.env.sh
+.env
