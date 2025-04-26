@@ -9,6 +9,7 @@ from brobot.models import (
     SessionMessage,
     ScenarioChapter,
     ChapterCompletion,
+    User,
 )
 from brobot.dto import TrainingSessionDTO
 from brobot.dto import SessionMessageDTO
@@ -92,13 +93,19 @@ async def test_get_or_create_creates_new_training_session(session):
 
 @pytest.mark.asyncio
 async def test_delete_session_with_messages_and_completion(session):
+    user = User(email="test@example.com")
+    session.add(user)
+    session.commit()
+
     # Create a scenario
-    scenario = Scenario(title="Test Scenario", description="Description")
+    scenario = Scenario(
+        title="Test Scenario", slug="test-scenario", description="Description"
+    )
     session.add(scenario)
     session.flush()
 
     # Create a training session
-    training_session = TrainingSession(user_id=1, scenario_id=scenario.id)
+    training_session = TrainingSession(user_id=user.id, scenario_id=scenario.id)
     session.add(training_session)
     session.flush()
 

@@ -2,6 +2,7 @@ from brobot.dto.create.create_scenario import (
     CreateScenarioDTO,
     CreateScenarioChapterDTO,
 )
+from brobot.dto.create.import_scenario import ImportRequestDTO
 from brobot.dto.scenario_chapter import (
     ScenarioChapterWithoutContentDTO,
     ScenarioChapterDTO,
@@ -14,6 +15,7 @@ from brobot.dto.session_with_scenarios import (
 )
 
 __all__ = [
+    "ImportRequestDTO",
     "ScenarioChapterDTO",
     "CreateScenarioChapterDTO",
     "CreateScenarioDTO",

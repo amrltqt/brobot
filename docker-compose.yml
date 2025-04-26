@@ -11,6 +11,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: api
     ports:
       - "8000:8000"
     depends_on:
@@ -27,7 +28,6 @@ services:
       POSTGRES_DB: ${BROBOT_DATABASE_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./data/initdb:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
 

@@ -6,6 +6,9 @@ import { ErrorDisplay } from "@/components/common/error-display";
 import { Empty } from "@/components/common/empty";
 
 import { useScenarios } from "@/hooks/use-scenarios";
+import { Button } from "@/components/ui/button";
+import { PlusIcon } from "lucide-react";
+import { ImportScenarioDialog } from "@/components/scenarios/import-scenario-dialog";
 
 export default function Page() {
     const {
@@ -14,11 +17,14 @@ export default function Page() {
         isError,
         deleteScenario,
         startScenario,
+        importScenario,
     } = useScenarios();
 
     if (isLoading) return <Loading message="Loading scenarios..." />;
     if (isError) return <ErrorDisplay message={isError.message} />;
-    if (scenarios.length === 0) return <Empty message="No scenarios available" />;
+    if (scenarios.length === 0) return <Empty message="No scenarios available" action={
+        <ImportScenarioDialog onImport={importScenario} />
+    } />;
 
     return (
         <div className="space-y-4">

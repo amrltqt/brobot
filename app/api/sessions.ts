@@ -1,6 +1,5 @@
-import { API_URL } from "@/utils/api";
 import { TrainingSessionDTO } from "../models/session";
-
+import { API_URL } from "@/utils/api";
 
 const BASE_HEADERS = {
     "Content-Type": "application/json",

@@ -1,8 +1,23 @@
 import datetime
-from typing import Optional, List
-from sqlmodel import Field, SQLModel, Relationship, Column, JSON
+from typing import Optional, List, Dict
+from sqlmodel import Field, SQLModel, Relationship, JSON
 
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, Column, Integer, String, DateTime
+
+
+def now_utc() -> datetime.datetime:
+    return datetime.datetime.now(datetime.timezone.utc)
+
+
+class User(SQLModel, table=True):
+    __tablename__ = "user"
+
+    id: int = Field(default=None, primary_key=True)
+    email: str = Field(sa_column=Column(String(255), nullable=False, unique=True))
+    name: Optional[str] = Field(default=None, sa_column=Column(String(255)))
+    created_at: datetime.datetime = Field(default_factory=now_utc)
+
+    sessions: List["TrainingSession"] = Relationship(back_populates="user")
 
 
 class TrainingSession(SQLModel, table=True):
@@ -17,13 +32,15 @@ class TrainingSession(SQLModel, table=True):
         UniqueConstraint("user_id", "scenario_id", name="unique_user_scenario"),
     )
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: str
+    id: int = Field(sa_column=Column(Integer, primary_key=True, autoincrement=True))
+    user_id: int = Field(foreign_key="user.id")
     scenario_id: int = Field(foreign_key="scenario.id")
     created_at: datetime.datetime = Field(
-        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
+        sa_column=Column(DateTime, nullable=False),
+        default_factory=now_utc,
     )
 
+    user: "User" = Relationship(back_populates="sessions")
     scenario: "Scenario" = Relationship(back_populates="sessions")
     messages: List["SessionMessage"] = Relationship(back_populates="session")
     completions: List["ChapterCompletion"] = Relationship(back_populates="session")
@@ -36,12 +53,13 @@ class SessionMessage(SQLModel, table=True):
 
     __tablename__ = "session_message"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int = Field(sa_column=Column(Integer, primary_key=True, autoincrement=True))
     session_id: int = Field(foreign_key="training_session.id")
-    role: str = Field(default="user")
-    content: str
+    role: str = Field(sa_column=Column(String(50), nullable=False, default="user"))
+    content: str = Field(sa_column=Column(String, nullable=False))
     created_at: datetime.datetime = Field(
-        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
+        sa_column=Column(DateTime, nullable=False),
+        default_factory=now_utc,
     )
 
     session: "TrainingSession" = Relationship(back_populates="messages")
@@ -54,12 +72,13 @@ class ScenarioChapter(SQLModel, table=True):
 
     __tablename__ = "scenario_chapter"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    scenario_id: int = Field(foreign_key="scenario.id")
-    title: str
-    content: str
-    order: int
-    meta: Optional[dict] = Field(default={}, sa_column=Column(JSON))
+    id: int = Field(sa_column=Column(Integer, primary_key=True, autoincrement=True))
+    scenario_id: int = Field(foreign_key="scenario.id", nullable=False)
+    title: str = Field(sa_column=Column(String(255), nullable=False))
+    content: str = Field(sa_column=Column(String, nullable=False))
+    order: int = Field(sa_column=Column(Integer, nullable=False))
+
+    meta: Optional[Dict] = Field(default_factory=dict, sa_column=Column(JSON))
 
     scenario: Optional["Scenario"] = Relationship(back_populates="chapters")
     completions: List["ChapterCompletion"] = Relationship(back_populates="chapter")
@@ -73,11 +92,13 @@ class Scenario(SQLModel, table=True):
 
     __tablename__ = "scenario"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    title: str
-    description: str
+    id: int = Field(sa_column=Column(Integer, primary_key=True, autoincrement=True))
+    title: str = Field(sa_column=Column(String(255), nullable=False))
+    slug: str = Field(sa_column=Column(String(255), nullable=False, unique=True))
+    description: str = Field(sa_column=Column(String, nullable=False))
     created_at: datetime.datetime = Field(
-        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
+        sa_column=Column(DateTime, nullable=False),
+        default_factory=now_utc,
     )
 
     chapters: List["ScenarioChapter"] = Relationship(back_populates="scenario")
@@ -87,14 +108,15 @@ class Scenario(SQLModel, table=True):
 class ChapterCompletion(SQLModel, table=True):
     __tablename__ = "chapter_completion"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int = Field(sa_column=Column(Integer, primary_key=True, autoincrement=True))
 
     session_id: int = Field(foreign_key="training_session.id", index=True)
     chapter_id: int = Field(foreign_key="scenario_chapter.id", index=True)
     message_id: int = Field(foreign_key="session_message.id")
 
     completed_at: datetime.datetime = Field(
-        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
+        sa_column=Column(DateTime, nullable=False),
+        default_factory=now_utc,
     )
 
     session: "TrainingSession" = Relationship(back_populates="completions")

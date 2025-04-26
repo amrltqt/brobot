@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS scenario (
     id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

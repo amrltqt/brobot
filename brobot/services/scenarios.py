@@ -2,6 +2,7 @@ from typing import Optional, List
 
 import requests
 
+from pydantic import HttpUrl
 from sqlmodel import Session, select
 from brobot.models import Scenario, ScenarioChapter
 
@@ -128,7 +129,7 @@ class ScenarioService:
         self.session.commit()
         return scenario_model
 
-    def import_github(self, url: str) -> Optional[ScenarioWithChapterDTO]:
+    def import_github(self, url: HttpUrl) -> Optional[ScenarioWithChapterDTO]:
         """
         Import a scenario from a GitHub URL.
 
@@ -145,16 +146,19 @@ class ScenarioService:
         # Extract the file path from the URL to get the raw content
         # https://raw.githubusercontent.com/amrltqt/brobot/master/data/scenarios/introduction-sql.json
 
-        if not url.startswith("https://github.com/"):
+        if not url.host == "github.com":
             raise ValueError("Invalid GitHub URL")
 
-        if not url.endswith(".json"):
+        if not url.path.endswith(".json"):
             raise ValueError("Invalid file type. Only .json files are supported.")
 
         # Extract the file path from the URL
-        file_path = url.split("github.com/")[1].replace("blob/", "").replace(" ", "%20")
-        raw_url = f"https://raw.githubusercontent.com/{file_path}"
-
+        # https://github.com/amrltqt/brobot/blob/master/data/scenarios/introduction-sql.json
+        # Example: https://raw.githubusercontent.com/amrltqt/brobot/refs/heads/master/data/scenarios/introduction-sql.json
+        raw_url = "https://raw.githubusercontent.com" + url.path.replace(
+            "blob/", ""
+        ).replace("refs/heads/", "")
+        print(raw_url)
         # Fetch the content from the raw URL
 
         response = requests.get(raw_url)
