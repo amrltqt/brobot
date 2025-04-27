@@ -1,11 +1,12 @@
 # Brobot
 
+[![CI](https://github.com/amrltqt/brobot/actions/workflows/ci.yml/badge.svg)](https://github.com/amrltqt/brobot/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Description
 
-Brobot is an open-source web platform designed to enhance human learning through interactive, bot-assisted courses.
-It allows students to follow step-by-step lessons created by teachers, with personalized guidance from a bot that strictly follow the content of each course.
-
+Brobot is an open-source platform that enhances human learning through interactive, bot-assisted courses.
+Students progress through teacher-crafted lessons with personalized support from a bot that strictly follows the course content.
 
 ## Installation
 
@@ -13,6 +14,7 @@ Before you start, ensure you have the following prerequisites installed:
 * [Python 3.12+](https://www.python.org/downloads/)
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
+* [Make](https://www.gnu.org/software/make/)
 
 
 You have to initialize a `.env.sh` file in the root of the project. You can use the provided `.env.sh.example` file as a template. 
@@ -44,76 +46,12 @@ Then simplest way to start is to use the provided `docker compose` file.
 ```shell
 git clone git@github.com:amrltqt/brobot.git
 cd brobot
-docker compose build && docker compose up
+make reset # This will build the docker images and start the containers
 ```
-
 This will initialize a database and start a server plus a web client available on `http://localhost:3000`.
 
-
 ## Development
-If you want to run the project locally without Docker, you can do so by following these steps:
 
-1. Clone the repository:
-
-```shell
-git clone git@github.com:amrltqt/brobot.git
-cd brobot
-```
-
-### Web server 
-
-To install Brobot, install the required dependencies:
-
-* [uv](https://docs.astral.sh/uv/getting-started/installation/)
-
-Once you have `uv` installed, clone the repository and install the required dependencies:
-
-```shell
-cd brobot
-uv sync --all-extras --dev
-```
-
-This will create a virtual environment and install the required dependencies in it for the web server and the bot.
-
-### Web client
-
-The web client is a nextjs application in the app folder.
-
-To install the web client, navigate to the `app` directory and install the required dependencies:
-
-```shell
-cd app
-npm install
-```
-This will install the required dependencies for the web client.
-
-## Usage
-
-To run the web server, use the following command:
-
-```shell
-source .venv/bin/activate
-fastapi run brobot/app.py
-```
-
-This will start the web server on `http://localhost:8000`.
-
-In a separate terminal, navigate to the `app` directory and run the following command to start the web client:
-
-```shell
-cd app
-npm run dev
-```
-
-This will start the web client on `http://localhost:3000`.
-
-Once the app is started, you should add a first scenario. 
-I started brobot with in mind the idea of training people in SQL, so I created a first example available in the `/data` folder.
-
-Import it in your instance with:
-
-```shell
-export PYTHONPATH=$(pwd)
-
-typer brobot.cli run data/scenarios/introduction-sql.json
-```
+The current docker compose file is built for development. It mounts the current directory into the container, so you can edit the code and see the changes immediately.
+The server is running on port 8000 and the web client is running on port 3000.
+The database is running on port 5432 and is accessible from the host machine.
