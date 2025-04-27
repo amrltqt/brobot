@@ -110,6 +110,7 @@ class ScenarioService:
             Scenario: The created scenario object.
         """
         scenario_model = Scenario(
+            slug=scenario.slug,
             title=scenario.title,
             description=scenario.description,
         )

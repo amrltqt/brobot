@@ -20,7 +20,7 @@ def test_get_returns_none_if_not_found(session):
 
 
 def test_get_returns_scenario_with_chapters(session):
-    scenario = Scenario(title="Test", description="Desc")
+    scenario = Scenario(title="Test", description="Desc", slug="test")
     chapter1 = ScenarioChapter(title="C1", content="Content 1", order=1, scenario_id=1)
     chapter2 = ScenarioChapter(title="C2", content="Content 2", order=2, scenario_id=1)
 
@@ -42,8 +42,8 @@ def test_get_returns_scenario_with_chapters(session):
 
 
 def test_get_all_returns_all_scenarios(session):
-    s1 = Scenario(title="S1", description="D1")
-    s2 = Scenario(title="S2", description="D2")
+    s1 = Scenario(title="S1", description="D1", slug="s1")
+    s2 = Scenario(title="S2", description="D2", slug="s2")
     session.add_all([s1, s2])
     session.commit()
 
@@ -56,7 +56,7 @@ def test_get_all_returns_all_scenarios(session):
 
 
 def test_delete_removes_scenario_and_chapters(session):
-    scenario = Scenario(title="S", description="D")
+    scenario = Scenario(title="S", description="D", slug="s")
     session.add(scenario)
     session.flush()
 
@@ -89,6 +89,7 @@ def test_create_scenario(session: Session):
     """
 
     scenario_creation = CreateScenarioDTO(
+        slug="test-scenario",
         title="Test Scenario",
         description="This is a test scenario.",
         chapters=[
@@ -96,9 +97,7 @@ def test_create_scenario(session: Session):
                 title="Chapter 1", content="Content of chapter 1", order=1, meta={}
             ),
             CreateScenarioChapterDTO(
-                title="Chapter 2",
-                content="Content of chapter 2",
-                order=2,
+                title="Chapter 2", content="Content of chapter 2", order=2, meta={}
             ),
         ],
     )

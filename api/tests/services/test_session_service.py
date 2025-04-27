@@ -25,7 +25,9 @@ def session():
 
 @pytest.mark.asyncio
 async def test_get_returns_training_session(session):
-    scenario = Scenario(title="Test Scenario", description="Description")
+    scenario = Scenario(
+        title="Test Scenario", description="Description", slug="test-scenario"
+    )
     session.add(scenario)
     session.flush()
 
@@ -53,7 +55,9 @@ async def test_users_sessions_returns_none_if_not_found(session):
 
 @pytest.mark.asyncio
 async def test_users_sessions_returns_training_session(session):
-    scenario = Scenario(title="Test Scenario", description="Description")
+    scenario = Scenario(
+        title="Test Scenario", description="Description", slug="test-scenario"
+    )
     session.add(scenario)
     session.flush()
 
@@ -72,7 +76,9 @@ async def test_users_sessions_returns_training_session(session):
 
 @pytest.mark.asyncio
 async def test_get_or_create_creates_new_training_session(session):
-    scenario = Scenario(title="Test Scenario", description="Description")
+    scenario = Scenario(
+        title="Test Scenario", description="Description", slug="test-scenario"
+    )
     session.add(scenario)
     session.commit()
 
@@ -93,7 +99,7 @@ async def test_get_or_create_creates_new_training_session(session):
 
 @pytest.mark.asyncio
 async def test_delete_session_with_messages_and_completion(session):
-    user = User(email="test@example.com")
+    user = User(email="test@example.com", hashed_password="hashed_password")
     session.add(user)
     session.commit()
 
@@ -154,7 +160,7 @@ async def test_delete_session_with_messages_and_completion(session):
 @pytest.mark.asyncio
 async def test_get_complete_session_returns_model(session):
     # Prepare a scenario and a training session
-    scenario = Scenario(title="Test Scenario", description="Desc")
+    scenario = Scenario(title="Test Scenario", description="Desc", slug="test-scenario")
     session.add(scenario)
     session.commit()
     session.refresh(scenario)
@@ -181,7 +187,7 @@ async def test_get_complete_session_returns_none(session):
 @pytest.mark.asyncio
 async def test_generate_answer_persists_and_returns_message(session, monkeypatch):
     # Prepare scenario and chapter
-    scenario = Scenario(title="Test Scenario", description="Desc")
+    scenario = Scenario(title="Test Scenario", description="Desc", slug="test-scenario")
     session.add(scenario)
     session.commit()
     session.refresh(scenario)
