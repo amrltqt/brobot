@@ -58,7 +58,7 @@ interface DeleteSessionOptions {
 export async function deleteSession(
     { sessionId }: DeleteSessionOptions
 ): Promise<void> {
-    await apiRequest<void>(`/${sessionId}`, {
+    await apiRequest<void>(`/sessions/${sessionId}`, {
         method: "DELETE",
     });
 }
