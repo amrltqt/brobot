@@ -1,5 +1,3 @@
-from textwrap import dedent
-
 from agents import (
     trace,
     Runner,
@@ -22,31 +20,11 @@ async def generate_answer(
     and the session in progress
     """
 
-    focused_messages: list[ResponseInputItemParam] = [
-        {
-            "role": "assistant",
-            "content": dedent(
-                f"""
-                Overall scenario: 
-                {scenario.description}
-
-                Current part:
-                {current_chapter.content}
-                """
-            ),
-        }
-    ]
-
-    for message in messages:
-        focused_messages.append(message)
-
     agent = prepared_agent(
         scenario=scenario,
         chapter=current_chapter,
     )
 
     with trace("training"):
-        result = await Runner.run(
-            starting_agent=agent, input=focused_messages, context=context
-        )
+        result = await Runner.run(starting_agent=agent, input=messages, context=context)
         return result.final_output
