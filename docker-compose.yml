@@ -3,14 +3,21 @@ services:
     build: 
       context: ./app
       dockerfile: Dockerfile
+    volumes:
+      - ./app:/usr/src/app
+      - /usr/src/app/node_modules
+    working_dir: /usr/src/app
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
   api:
     build:
-      context: .
+      context: ./api
       dockerfile: Dockerfile
+    container_name: api
+    volumes:
+      - ./api/brobot:/app/brobot
     ports:
       - "8000:8000"
     depends_on:
@@ -19,7 +26,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DATABASE_URL=${DATABASE_URL}
   postgres:
-    image: postgres:14
+    image: postgres:16
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${BROBOT_DATABASE_USER}
@@ -27,7 +34,6 @@ services:
       POSTGRES_DB: ${BROBOT_DATABASE_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./data/initdb:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
 

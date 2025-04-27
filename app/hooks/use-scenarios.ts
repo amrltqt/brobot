@@ -18,7 +18,7 @@ export function useScenarios() {
     );
 
     useEffect(() => {
-        setHeader("Home");
+        setHeader("Training Hub");
     }, []);
 
     const deleteScenario = useCallback(
@@ -57,11 +57,32 @@ export function useScenarios() {
         [router]
     );
 
+    const importScenario = useCallback(
+        async (slug: string, url: string) => {
+            const res = await fetch(`${API_URL}/scenarios/import/github`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ slug, url }),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to import scenario");
+            }
+
+            // Revalidation
+            mutate();
+        },
+        [mutate]
+    );
+
     return {
         scenarios: data || [],
         isLoading: !error && !data,
         isError: error,
         deleteScenario,
         startScenario,
+        importScenario,
     };
 }

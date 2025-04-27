@@ -17,6 +17,7 @@ class CreateScenarioDTO(BaseModel):
     DTO for creating a scenario.
     """
 
+    slug: str
     title: str
     description: str
     chapters: list[CreateScenarioChapterDTO]

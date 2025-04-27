@@ -6,7 +6,7 @@ from sqlmodel import Session
 from brobot.services.scenarios import ScenarioService
 from brobot.database import get_session
 
-from brobot.dto import ScenarioWithChapterDTO
+from brobot.dto import ScenarioWithChapterDTO, ImportRequestDTO
 
 router = APIRouter()
 
@@ -45,13 +45,13 @@ async def delete_scenario_route(
 
 @router.post("/import/github", status_code=201)
 async def import_scenario_from_github(
-    url: str, session: Session = Depends(get_session)
+    import_request: ImportRequestDTO, session: Session = Depends(get_session)
 ):
     """
     Import a scenario from a GitHub repository.
     """
     service = ScenarioService(session)
-    scenario = service.import_github(url)
+    scenario = service.import_github(import_request.url, import_request.slug)
     if not scenario:
         raise HTTPException(status_code=400, detail="Failed to import scenario")
 
