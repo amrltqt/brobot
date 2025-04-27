@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 import logging
-
+from textwrap import dedent
 from sqlmodel import Session, select
 
 from brobot.models import (
@@ -10,7 +10,6 @@ from brobot.models import (
     ChapterCompletion,
     ScenarioChapter,
 )
-
 
 from brobot.dto import (
     SessionMessageDTO,
@@ -279,7 +278,14 @@ class SessionService:
             messages = [
                 {
                     "role": "assistant",
-                    "content": "Start",
+                    "content": dedent(
+                        """
+                            Start the scenario by welcoming the user and 
+                            exposing the summary of the scenario and what the user will learn.
+
+                            Propose him to start the first chapter.
+                        """
+                    ),
                 }
             ]
         else:
