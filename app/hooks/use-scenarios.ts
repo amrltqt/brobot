@@ -18,7 +18,7 @@ export function useScenarios() {
     );
 
     useEffect(() => {
-        setHeader("Home");
+        setHeader("Training Hub");
     }, []);
 
     const deleteScenario = useCallback(
@@ -59,7 +59,7 @@ export function useScenarios() {
 
     const importScenario = useCallback(
         async (slug: string, url: string) => {
-            const res = await fetch(`${API_BASE}/scenarios/import/github`, {
+            const res = await fetch(`${API_URL}/scenarios/import/github`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

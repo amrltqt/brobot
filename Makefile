@@ -18,13 +18,12 @@ logs:
 	$(COMPOSE) logs -f
 
 bash:
-	$(COMPOSE) exec $(APP_CONTAINER) bash
+	$(COMPOSE) exec $(API_CONTAINER) bash
 
 migrate:
-	$(COMPOSE) exec $(APP_CONTAINER) alembic upgrade head
-
+	${COMPOSE} exec $(API_CONTAINER) bash -c "/app/.venv/bin/alembic upgrade head"
 reset:
 	$(COMPOSE) down -v
 	$(COMPOSE) up -d --build
 	sleep 5
-	$(COMPOSE) exec $(APP_CONTAINER) alembic upgrade head
+	$(COMPOSE) exec $(API_CONTAINER) sh -c  "/app/.venv/bin/alembic upgrade head"

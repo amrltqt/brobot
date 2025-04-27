@@ -6,8 +6,6 @@ import { ErrorDisplay } from "@/components/common/error-display";
 import { Empty } from "@/components/common/empty";
 
 import { useScenarios } from "@/hooks/use-scenarios";
-import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
 import { ImportScenarioDialog } from "@/components/scenarios/import-scenario-dialog";
 
 export default function Page() {
@@ -27,19 +25,15 @@ export default function Page() {
     } />;
 
     return (
-        <div className="space-y-4">
-            <h1 className="text-2xl font-bold">Training hub</h1>
-            <p className="text-lg">Start learning today</p>
-            <div className="grid gap-4">
-                {scenarios.map((scenario) => (
-                    <ScenarioCard
-                        key={scenario.id}
-                        scenario={scenario}
-                        onStart={() => startScenario(scenario.id)}
-                        onDelete={() => deleteScenario(scenario.id)}
-                    />
-                ))}
-            </div>
+        <div className="grid gap-4">
+            {scenarios.map((scenario) => (
+                <ScenarioCard
+                    key={scenario.id}
+                    scenario={scenario}
+                    onStart={() => startScenario(scenario.id)}
+                    onDelete={() => deleteScenario(scenario.id)}
+                />
+            ))}
         </div>
     );
 }

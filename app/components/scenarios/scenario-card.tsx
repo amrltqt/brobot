@@ -28,27 +28,26 @@ export function ScenarioCard({
     const chaptersCount = chapters?.length ?? 0;
 
     return (
-        <Card className="w-full">
+        <Card className="rounded-md">
             <CardHeader className="flex items-center justify-between pb-2">
-                <CardTitle className="text-lg">{title}</CardTitle>
+                <CardTitle className="text-2xl font-bold tracking-tight">{title}</CardTitle>
                 <Badge variant="secondary" className="flex items-center space-x-1">
                     <BookOpen className="h-4 w-4" />
                     <span>{chaptersCount}</span>
                 </Badge>
             </CardHeader>
 
-            <CardContent className="p-2">
-                <p className="text-sm text-muted-foreground">
-                    {description}
-                </p>
+            <CardContent className="text-muted-foreground">
+                {description}
+
             </CardContent>
 
-            <CardFooter className="flex justify-end space-x-2 p-2">
-                <Button size="sm" onClick={onStart}>
+            <CardFooter className="mt-2 flex flex-row gap-4">
+                <Button onClick={onStart}>
                     <Play className="mr-1 h-4 w-4" />
                     Start
                 </Button>
-                <Button size="sm" variant="destructive" onClick={onDelete}>
+                <Button variant="destructive" onClick={onDelete}>
                     <Trash2 className="mr-1 h-4 w-4" />
                     Delete
                 </Button>

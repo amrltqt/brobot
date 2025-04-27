@@ -51,7 +51,7 @@ async def import_scenario_from_github(
     Import a scenario from a GitHub repository.
     """
     service = ScenarioService(session)
-    scenario = service.import_github(import_request.url)
+    scenario = service.import_github(import_request.url, import_request.slug)
     if not scenario:
         raise HTTPException(status_code=400, detail="Failed to import scenario")
 

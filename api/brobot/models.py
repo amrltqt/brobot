@@ -2,7 +2,7 @@ import datetime
 from typing import Optional, List, Dict
 from sqlmodel import Field, SQLModel, Relationship, JSON
 
-from sqlalchemy import UniqueConstraint, Column, Integer, String, DateTime
+from sqlalchemy import UniqueConstraint, Column, Integer, String, DateTime, Boolean
 
 
 def now_utc() -> datetime.datetime:
@@ -15,7 +15,18 @@ class User(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     email: str = Field(sa_column=Column(String(255), nullable=False, unique=True))
     name: Optional[str] = Field(default=None, sa_column=Column(String(255)))
-    created_at: datetime.datetime = Field(default_factory=now_utc)
+    created_at: datetime.datetime = Field(
+        sa_column=Column(DateTime, nullable=False),
+        default_factory=now_utc,
+    )
+
+    hashed_password: str = Field(sa_column=Column(String(255), nullable=False))
+    is_active: bool = Field(
+        default=True, sa_column=Column(Boolean, nullable=False, default=True)
+    )
+    is_superuser: bool = Field(
+        default=False, sa_column=Column(Boolean, nullable=False, default=False)
+    )
 
     sessions: List["TrainingSession"] = Relationship(back_populates="user")
 

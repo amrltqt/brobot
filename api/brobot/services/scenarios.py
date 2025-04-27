@@ -129,7 +129,9 @@ class ScenarioService:
         self.session.commit()
         return scenario_model
 
-    def import_github(self, url: HttpUrl) -> Optional[ScenarioWithChapterDTO]:
+    def import_github(
+        self, url: HttpUrl, slug: str
+    ) -> Optional[ScenarioWithChapterDTO]:
         """
         Import a scenario from a GitHub URL.
 
@@ -170,6 +172,7 @@ class ScenarioService:
 
         # Create the scenario and chapters
         scenario = Scenario(
+            slug=slug,
             title=content["title"],
             description=content["description"],
         )
