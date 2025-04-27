@@ -1,37 +1,42 @@
 {
-    "id": 1,
     "title": "Introduction to SELECT",
     "description": "Learn how to SELECT data efficiently by retrieving only the subset of data you need, thereby controlling costs, boosting performance, and ensuring consistency.",
     "chapters": [
         {
-            "id": 1,
             "order": 1,
-            "scenario_id": 1,
             "title": "Selecting Columns Efficiently with Ordering",
-            "content": "<concept>\nIn SQL, it's important to retrieve only the data you really need. By doing this, you can keep your queries simple and easy to understand.\n\nWith the SELECT statement, you choose which columns you want to see, while the FROM clause tells SQL which table to look in. The LIMIT clause lets you see just a small part of the data, which is especially helpful when you're starting out or when you only want a quick glimpse of the information.\n\nAdditionally, the ORDER BY clause helps you arrange your data in a specific order—either from lowest to highest (ASC) or highest to lowest (DESC). This makes it easier to read the results, such as listing names in alphabetical order or ordering scores from best to worst.\n</concept>\n<examples>\nExample 1: Retrieve a single row ordered by student id in ascending order:\n```sql\nSELECT id FROM students ORDER BY id ASC LIMIT 1;\n```\n\nExample 2: Retrieve all students ordered by note in descending order:\n```sql\nSELECT name, note FROM students ORDER BY note DESC;\n```\n</examples>\n<exercice>\nWrite a SQL query that retrieves the name and note of two students.\nUse the LIMIT clause to restrict the number of results and the ORDER BY clause to sort the data by name in ascending order.\n</exercice>\n<success>\nThe student should provide a working query using SELECT to specify the columns, FROM to indicate the table, LIMIT to restrict the result set, and ORDER BY (with ASC or DESC) to sort the data as required. An explanation of why ordering is important should accompany the query.\n</success>\n<data>\nid | name    | note\n--------------------\n1  | Alice   | 7\n2  | John    | 6\n3  | Charlie | 8\n</data>",
-            "meta": {
-                "create_instructions": [
-                    "CREATE TABLE students (\n    id INTEGER,\n    name VARCHAR(50),\n    note INTEGER\n);"
-                ],
-                "insert_instructions": [
-                    "INSERT INTO students (id, name, note) VALUES \n    (1, 'Alice', 7),\n    (2, 'John', 6),\n    (3, 'Charlie', 8);"
-                ]
-            }
+            "content": "<concept>\nIn SQL, it's important to retrieve only the data you really need. By doing this, you keep your queries simple, fast, and easy to understand.\n\n- **SELECT** specifies which columns to return.\n- **FROM** tells SQL which table to query.\n- **ORDER BY** arranges your results (`ASC` for ascending, `DESC` for descending).\n- **LIMIT** restricts the number of returned rows.\n\nCombining these lets you preview or inspect just the slice of data you care about.\n</concept>\n<examples>\n-- 1. One row, lowest `id` first:\n```sql\nSELECT id\nFROM students\nORDER BY id ASC\nLIMIT 1;\n```\n\n-- 2. All students, highest `note` first:\n```sql\nSELECT name, note\nFROM students\nORDER BY note DESC;\n```\n</examples>\n<exercise>\nWrite a query that:\n1. Retrieves the `name` and `note` of two students.\n2. Sorts the results by `name` in ascending order.\n3. Limits the output to 2 rows.\n</exercise>\n<success>\nThe student should combine `SELECT name, note`, `FROM students`, `ORDER BY name ASC`, and `LIMIT 2`. They should explain why ordering helps in reading results.\n</success>\n<data>\nid | name    | note\n--------------------\n1  | Alice   | 7\n2  | John    | 6\n3  | Charlie | 8\n</data>",
+            "meta": {}
         },
         {
-            "id": 2,
             "order": 2,
-            "scenario_id": 1,
             "title": "Master Arithmetics and Derived Columns",
-            "content": "<concept>\nA derived column is a new column generated on the fly by applying arithmetic operations to existing columns. This allows you to transform data dynamically without modifying the underlying table.\n\n**Common Arithmetic Operations:**\n- **Addition (+):** Combines values from one or more columns (e.g., calculating total scores).\n- **Subtraction (-):** Computes the difference between values (e.g., measuring a gap between scores).\n- **Multiplication (*):** Scales values (e.g., converting a score on 10 to a score on 20).\n- **Division (/):** Computes ratios or averages (ensure you handle division by zero appropriately).\n- **Modulo (%):** Returns the remainder of a division (available in some SQL dialects).\n\nUsing an alias for a derived column gives it a meaningful name, making the output clearer for reporting and analysis.\n</concept>\n<examples>\nExample: Convert a score from a scale of 10 to 20, add bonus points, and compute a normalized score:\n```sql\nSELECT \n    name, \n    note AS note_on_10,\n    note * 2 AS note_on_20,\n    note + 1 AS note_with_bonus,\n    (note * 2) / 20.0 AS normalized_score\nFROM students;\n```\n</examples>\n<exercice>\nWrite a query that:\n1. Selects each student's name and their original note (on 10).\n2. Creates a new column “note_on_20” by multiplying the original note by 2.\n3. Creates another derived column “note_with_bonus” by adding 1 to the original note.\n4. Optionally, computes a “normalized_score” by dividing the note_on_20 by 20.\n\nMake sure to use aliases to clearly label each derived column.\n</exercice>\n<success>\nThe student provides a working query that applies arithmetic operations to compute the derived columns. They explain that derived columns allow on-the-fly data transformation and that aliases help clarify the purpose of each result in reporting.\n</success>\n<data>\nid | name    | note\n-------------------\n1  | Alice   | 7\n2  | John    | 6\n3  | Charlie | 8\n</data>",
-            "meta": {
-                "create_instructions": [
-                    "CREATE TABLE students (\n    id INTEGER,\n    name VARCHAR(50),\n    note INTEGER\n);"
-                ],
-                "insert_instructions": [
-                    "INSERT INTO students (id, name, note) VALUES \n    (1, 'Alice', 7),\n    (2, 'John', 6),\n    (3, 'Charlie', 8);"
-                ]
-            }
+            "content": "<concept>\nA derived column is calculated on the fly from existing columns without altering the underlying table.\n\n**Common arithmetic operations:**\n- Addition (`+`)\n- Subtraction (`-`)\n- Multiplication (`*`)\n- Division (`/`) (take care to avoid division by zero)\n- Modulo (`%`) (available in some dialects)\n\nUse aliases (`AS`) to give meaningful names to these computed columns for clearer reporting.\n</concept>\n<examples>\n```sql\nSELECT\n  name,\n  note          AS note_on_10,\n  note * 2      AS note_on_20,\n  note + 1      AS note_with_bonus,\n  (note * 2) / 20.0 AS normalized_score\nFROM students;\n```\n</examples>\n<exercise>\nWrite a query that:\n1. Selects each student’s `name` and their original `note` (on 10).\n2. Computes a new column `note_on_20` by multiplying `note` by 2.\n3. Computes `note_with_bonus` by adding 1 to `note`.\n4. Optionally computes `normalized_score` by dividing `note_on_20` by 20.\n5. Uses aliases to label each derived column clearly.\n</exercise>\n<success>\nThe student provides a working `SELECT` statement with all arithmetic operations and explains that aliases clarify each column’s purpose in the output.\n</success>\n<data>\nid | name    | note\n-------------------\n1  | Alice   | 7\n2  | John    | 6\n3  | Charlie | 8\n</data>",
+            "meta": {}
+        },
+        {
+            "order": 3,
+            "title": "Filtering Results with WHERE",
+            "content": "<concept>\nThe `WHERE` clause restricts returned rows based on a condition.\n\n**Comparison operators:**\n- Equals: `=`  \n- Not equals: `!=` or `<>`  \n- Less than / greater than: `<`, `>`, `<=`, `>=`  \n- Text patterns: `LIKE` with `%` (zero or more chars) and `_` (single char)\n\nYou can also filter on expressions or derived columns.\n</concept>\n<examples>\n-- 1. Notes strictly greater than 6:\n```sql\nSELECT *\nFROM students\nWHERE note > 6;\n```\n\n-- 2. Names starting with 'J':\n```sql\nSELECT id, name\nFROM students\nWHERE name LIKE 'J%';\n```\n</examples>\n<exercise>\nWrite a query that:\n1. Retrieves `id`, `name`, and `note`.\n2. Filters students whose `note` is between 6 and 8.\n3. Only returns those whose `name` ends with 'e'.\n</exercise>\n<success>\nThe student uses `WHERE note BETWEEN 6 AND 8 AND name LIKE '%e'` to filter both numerically and textually.\n</success>\n<data>\nid | name    | note\n--------------------\n1  | Alice   | 7\n2  | John    | 6\n3  | Charlie | 8\n4  | Diane   | 5\n5  | Eve     | 8\n</data>",
+            "meta": {}
+        },
+        {
+            "order": 4,
+            "title": "Combining Conditions with AND and OR",
+            "content": "<concept>\nTo refine your filters, combine multiple conditions:\n\n- **AND**: all conditions must be true.\n- **OR**: at least one condition must be true.\n- **Precedence**: `AND` is evaluated before `OR`; use parentheses to control grouping.\n</concept>\n<examples>\n-- 1. `note > 7` AND name contains 'a':\n```sql\nSELECT *\nFROM students\nWHERE note > 7\n  AND name LIKE '%a%';\n```\n\n-- 2. `note < 6` OR name starts with 'C':\n```sql\nSELECT id, name, note\nFROM students\nWHERE note < 6\n   OR name LIKE 'C%';\n```\n\n-- 3. Parentheses for grouping:\n```sql\nSELECT *\nFROM students\nWHERE (note >= 6 AND note <= 8)\n  OR name = 'Alice';\n```\n</examples>\n<exercise>\nWrite a query that:\n1. Retrieves `name` and `note`.\n2. Filters students whose `note` is strictly greater than 7 OR whose `name` starts with 'D'.\n3. Explain whether parentheses are needed and why.\n</exercise>\n<success>\nThe student demonstrates correct use of `AND`/`OR` and justifies the use (or omission) of parentheses to avoid ambiguity.\n</success>\n<data>\nid | name    | note\n--------------------\n1  | Alice   | 7\n2  | John    | 6\n3  | Charlie | 8\n4  | Diane   | 9\n5  | Eve     | 5\n</data>",
+            "meta": {}
+        },
+        {
+            "order": 5,
+            "title": "Working with Dates",
+            "content": "<concept>\nDates in SQL usually use the `'YYYY-MM-DD'` format. You can:\n\n- Compare with `=`, `<`, `>`, etc.\n- Search a range with `BETWEEN ... AND ...`.\n- Extract parts (year, month, day) depending on the dialect.\n\nFiltering by date is essential for precise time-based analysis.\n</concept>\n<examples>\n-- 1. Events in 2024:\n```sql\nSELECT *\nFROM events\nWHERE event_date BETWEEN '2024-01-01' AND '2024-12-31';\n```\n\n-- 2. Orders after July 1, 2025:\n```sql\nSELECT order_id, order_date\nFROM orders\nWHERE order_date > '2025-07-01';\n```\n</examples>\n<exercise>\nGiven the table `events(id, name, event_date)`:\n1. Find all events before April 15, 2025.\n2. Find events between March 1, 2025 and June 1, 2025.\n</exercise>\n<success>\nThe student uses `WHERE event_date < '2025-04-15'` and `WHERE event_date BETWEEN '2025-03-01' AND '2025-06-01'` correctly.\n</success>\n<data>\nid | name             | event_date \n----------------------------------\n1  | Launch Party     | 2025-02-10\n2  | Mid-Year Review  | 2025-05-20\n3  | Hackathon        | 2025-04-14\n4  | End-of-Year Gala | 2025-12-01\n</data>",
+            "meta": {}
+        },
+        {
+            "order": 6,
+            "title": "Refining Your Search: LIMIT and Aliases",
+            "content": "<concept>\nTo make your results more focused and readable:\n\n- **LIMIT** restricts the number of returned rows.\n- **AS** lets you rename columns or tables for clarity.\n\nAliases are essential for clear reports and for labeling computed columns.\n</concept>\n<examples>\n-- 1. First two students by name with aliases:\n```sql\nSELECT\n  id   AS student_id,\n  name AS student_name\nFROM students\nORDER BY name ASC\nLIMIT 2;\n```\n\n-- 2. Casting note to float with alias:\n```sql\nSELECT\n  name,\n  (note + 0.0) AS note_float\nFROM students\nLIMIT 3;\n```\n</examples>\n<exercise>\nWrite a query that:\n1. Selects `id` and `name` with explicit aliases.\n2. Sorts by `id` in descending order.\n3. Limits to 3 results.\n4. Explains why aliases improve readability.\n</exercise>\n<success>\nThe student uses `AS`, `ORDER BY id DESC`, and `LIMIT 3`, and explains that aliases make the output clearer.\n</success>\n<data>\nid | name    | note\n--------------------\n1  | Alice   | 7\n2  | John    | 6\n3  | Charlie | 8\n4  | Diane   | 9\n5  | Eve     | 5\n</data>",
+            "meta": {}
         }
     ]
 }
