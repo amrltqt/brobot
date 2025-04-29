@@ -1,3 +1,4 @@
+import os
 from textwrap import dedent
 
 from agents import (
@@ -8,6 +9,9 @@ from agents import (
 from brobot.models import Scenario, ScenarioChapter
 from brobot.bot.context import ScenarioContext
 from brobot.bot.tools.record_part_completion import record_part_completion
+
+
+MODEL = os.getenv("MODEL_NAME", "gpt-4.1-mini")
 
 PROMPT = dedent(
     """
@@ -26,7 +30,7 @@ PROMPT = dedent(
 
     <definitions>
         • A **Course** contains one or more **Chapters**.  
-        • Each **Chapter** is broken into sequential **Parts** (micro‑lessons).  
+        • Each **Chapter** is broken into sequential **Parts** (micro-lessons).  
         • Each **Part** contains:
             – a concise learning **Summary** (why it matters)  
             – clearly listed **Key Concepts / Facts**  
@@ -87,7 +91,7 @@ def prepared_agent(
     """
     return Agent[ScenarioContext](
         name="trainer",
-        model="gpt-4.1-mini",
+        model=MODEL,
         instructions=PROMPT.format(
             CURRENT_CHAPTER_TITLE=chapter.title,
             SCENARIO_TITLE=scenario.title,

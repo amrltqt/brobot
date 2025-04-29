@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from brobot.api.routes import scenario, session
-from brobot.core.config import settings
+from brobot.config import settings
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(

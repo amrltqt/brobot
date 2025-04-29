@@ -25,6 +25,8 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DATABASE_URL=${DATABASE_URL}
+      - MODEL_NAME=${MODEL_NAME}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
   postgres:
     image: postgres:16
     restart: unless-stopped

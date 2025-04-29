@@ -1,5 +1,5 @@
 from sqlmodel import create_engine, Session, SQLModel
-from brobot.core.config import settings
+from brobot.config import settings
 
 engine = create_engine(settings.DATABASE_URL, echo=False)
 
