@@ -11,7 +11,6 @@ Students progress through teacher-crafted lessons with personalized support from
 ## Installation
 
 Before you start, ensure you have the following prerequisites installed:
-* [Python 3.12+](https://www.python.org/downloads/)
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 * [Make](https://www.gnu.org/software/make/)
