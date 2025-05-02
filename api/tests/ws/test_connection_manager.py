@@ -1,5 +1,4 @@
 import pytest
-import asyncio
 from collections import deque
 from starlette.websockets import WebSocketDisconnect
 from brobot.ws.manager import ConnectionManager
